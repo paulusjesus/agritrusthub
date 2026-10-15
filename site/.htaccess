@@ -8,6 +8,11 @@ DirectoryIndex index.html
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
   RewriteCond %{HTTP_HOST} ^www\.agritrusthub\.com$ [NC]
   RewriteRule ^ https://agritrusthub.com%{REQUEST_URI} [L,R=301]
+
+  # Every page address (/about, /app/market, /listing/12) is served by the app
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ /index.html [L]
 </IfModule>
 
 <IfModule mod_headers.c>
@@ -18,10 +23,10 @@ DirectoryIndex index.html
     Header set Cache-Control "no-cache"
   </FilesMatch>
   <FilesMatch "\.(js|css|png|jpg|jpeg|svg|webp)$">
-    Header set Cache-Control "public, max-age=604800"
+    Header set Cache-Control "public, max-age=2592000"
   </FilesMatch>
 </IfModule>
 
 <IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/xml application/json application/javascript application/x-javascript text/javascript image/svg+xml
 </IfModule>

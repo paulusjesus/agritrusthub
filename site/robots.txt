@@ -1,2 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /app/admin
+
+Sitemap: https://agritrusthub.com/sitemap.xml

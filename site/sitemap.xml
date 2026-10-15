@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://agritrusthub.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://agritrusthub.com/platform</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://agritrusthub.com/buyers</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://agritrusthub.com/about</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://agritrusthub.com/contact</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://agritrusthub.com/app/market</loc><changefreq>daily</changefreq></url>
+  <url><loc>https://agritrusthub.com/signup</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://agritrusthub.com/privacy</loc><changefreq>yearly</changefreq></url>
+  <url><loc>https://agritrusthub.com/terms</loc><changefreq>yearly</changefreq></url>
+</urlset>

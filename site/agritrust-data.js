@@ -129,7 +129,8 @@
       sb.from('threads').select('*, pa:profiles!threads_a_fkey(' + P + '), pb:profiles!threads_b_fkey(' + P + ')').order('last_at', { ascending: false }),
       sb.from('messages').select('*').order('created_at', { ascending: false }).limit(2000),
       sb.from('notifications').select('*').eq('user_id', uid).order('created_at', { ascending: false }).limit(40),
-      sb.from('buyer_requests').select('*').order('created_at', { ascending: false }).limit(30),
+      sb.from('buyer_requests').select('*').eq('status', 'Open').order('created_at', { ascending: false }).limit(30),
+      sb.rpc('is_admin'),
     ]);
     res.forEach(function (r) { fail(r.error); });
     var d = res.map(function (r) { return r.data; });
@@ -137,8 +138,38 @@
       profile: d[0], priv: d[1], saved: d[2] || [], likes: d[3] || [], barterOffers: d[4] || [], landRequests: d[5] || [],
       alerts: d[6] || [], sightings: d[7] || [], disputes: d[8] || [], loans: d[9] || [], hauls: d[10] || [], entries: d[11] || [],
       scans: d[12] || [], interest: d[13] || [], offers: d[14] || [], threads: d[15] || [], messages: d[16] || [], notifications: d[17] || [],
-      buyerRequests: d[18] || [],
+      buyerRequests: d[18] || [], isAdmin: d[19] === true,
     };
+  }
+
+  async function replies(postId) {
+    var r = await sb.from('post_replies').select('*, who:profiles!post_replies_author_fkey(full_name,region)').eq('post_id', postId).order('created_at', { ascending: true }).limit(200);
+    fail(r.error, 'We could not load the replies.');
+    return r.data || [];
+  }
+
+  // Team queues for the admin page (row level security only returns rows to admins)
+  async function adminData() {
+    var q = function (t, extra) { return sb.from(t).select(extra || '*').order('created_at', { ascending: false }).limit(200); };
+    var res = await Promise.all([
+      q('agent_requests'), q('contact_messages'), q('buyer_requests'), q('loan_applications'), q('haul_requests'),
+      q('scan_requests'), q('disputes'), q('theft_alerts'), sb.rpc('admin_members'),
+    ]);
+    res.forEach(function (r) { fail(r.error); });
+    var d = res.map(function (r) { return r.data || []; });
+    return { agents: d[0], contacts: d[1], buyers: d[2], loans: d[3], hauls: d[4], scans: d[5], disputes: d[6], thefts: d[7], members: d[8] };
+  }
+  async function adminReset(userId) {
+    var s = await session();
+    var res = await fetch(SUPABASE_URL + '/functions/v1/agritrust-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY, Authorization: 'Bearer ' + (s ? s.access_token : '') },
+      body: JSON.stringify({ action: 'reset_password', user_id: userId }),
+    });
+    var j = {};
+    try { j = await res.json(); } catch (e) {}
+    if (!res.ok) throw new Error(j.error || 'We could not reset that password.');
+    return j;
   }
 
   async function insert(table, row, fallback) {
@@ -188,5 +219,6 @@
     insert: insert, update: update, remove: remove, openThread: openThread,
     markThreadRead: markThreadRead, markNotificationsRead: markNotificationsRead,
     subscribe: subscribe, unsubscribe: unsubscribe,
+    replies: replies, adminData: adminData, adminReset: adminReset,
   };
 })();
