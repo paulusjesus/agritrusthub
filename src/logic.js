@@ -331,7 +331,7 @@ class Component extends DCLogic {
     const f = typeof focus === 'number' ? focus : null;
     if (this.state.live) return this.go('market', { focus: f });
     if (!window.AT) return this.go('market');
-    this.setState({ guest: true, demo: false, ...EMPTY, mode: 'app', screen: 'market', focus: f, menu: false, cat: 'All', q: '' }, () => { this.top(); this.syncUrl(); });
+    this.setState({ guest: true, demo: false, ...EMPTY, user: 'Guest', avatar: '', mode: 'app', screen: 'market', focus: f, menu: false, cat: 'All', q: '' }, () => { this.top(); this.syncUrl(); });
     this.loadPublic().then(() => this.syncUrl()).catch((e) => this.say(e.message));
   };
   page = (page) => this.setState({ mode: 'site', page, menu: false }, () => { this.top(); this.syncUrl(); });
@@ -590,7 +590,8 @@ class Component extends DCLogic {
     });
 
     const q = s.q.trim().toLowerCase();
-    const fmtL = (l) => ({ ...l, ini: initialsOf(l.seller || s.user), featured: !!l.featured && !l.mine, mine: !!l.mine, verified: isDemo, repTxt: isDemo ? '★ ' + l.rating + ' · ' + l.trades : (l.trades ? l.trades + (l.trades === 1 ? ' signed deal' : ' signed deals') : 'New seller'), priceTxt: this.money(l.price, l.price < 100 ? 2 : 0), saveLbl: s.saved[l.id] ? 'Remove from AgriSave' : 'Save to AgriSave', heartFill: s.saved[l.id] ? '#D93A2B' : 'none', heartStroke: s.saved[l.id] ? '#D93A2B' : '#3E4A3C',
+    const sample = isDemo && !s.guest;
+    const fmtL = (l) => ({ ...l, ini: initialsOf(l.seller || s.user), featured: !!l.featured && !l.mine, mine: !!l.mine, verified: sample, repTxt: sample ? '★ ' + l.rating + ' · ' + l.trades : (l.trades ? l.trades + (l.trades === 1 ? ' signed deal' : ' signed deals') : 'New seller'), priceTxt: this.money(l.price, l.price < 100 ? 2 : 0), saveLbl: s.saved[l.id] ? 'Remove from AgriSave' : 'Save to AgriSave', heartFill: s.saved[l.id] ? '#D93A2B' : 'none', heartStroke: s.saved[l.id] ? '#D93A2B' : '#3E4A3C',
       toggleSave: (e) => {
         e && e.stopPropagation && e.stopPropagation();
         if (s.guest) { this.page('signin'); return this.say('Sign in to save listings.'); }
