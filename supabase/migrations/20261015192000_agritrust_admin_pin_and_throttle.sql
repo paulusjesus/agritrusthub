@@ -45,3 +45,7 @@ alter table agritrust.contact_messages add constraint contact_messages_size chec
 alter table agritrust.messages add constraint messages_size check (char_length(body) <= 4000) not valid;
 alter table agritrust.post_replies add constraint post_replies_size check (char_length(body) <= 4000) not valid;
 alter table agritrust.posts add constraint posts_size check (char_length(body) <= 8000 and char_length(title) <= 200) not valid;
+
+-- The sign-up function uses the service key, which needs these rights in the agritrust schema.
+grant select, insert on agritrust.signup_attempts to service_role;
+grant usage, select on all sequences in schema agritrust to service_role;
