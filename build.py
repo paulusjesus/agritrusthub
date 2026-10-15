@@ -158,8 +158,8 @@ DEAL_LIVE = f'''
                   <div style="min-width:0"><div style="font:700 19px {FONT}">{{{{ dl.name }}}}</div><div style="font-size:14px;color:#5B6657">{{{{ dl.seller }}}} · {{{{ dl.region }}}}</div><div style="font-size:14px;color:#2E5E2F;font-weight:600">Asking {{{{ dl.ask }}}} per {{{{ dl.unit }}}} · {{{{ dl.qtyTxt }}}} available</div></div>
                 </div>
                 <div style="display:grid;grid-template-columns:{{{{ A.two }}}};gap:12px">
-                  <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Your price per {{{{ dl.unit }}}} ({{{{ cx.code }}}})<input value="{{{{ V.oPrice }}}}" onChange="{{{{ on.oPrice }}}}" inputmode="decimal" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
-                  <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Quantity ({{{{ dl.unit }}}})<input value="{{{{ V.oQty }}}}" onChange="{{{{ on.oQty }}}}" inputmode="decimal" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
+                  <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C"><span>Your price per {{{{ dl.unit }}}} ({{{{ cx.code }}}})</span><input value="{{{{ V.oPrice }}}}" onChange="{{{{ on.oPrice }}}}" inputmode="decimal" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
+                  <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C"><span>Quantity ({{{{ dl.unit }}}})</span><input value="{{{{ V.oQty }}}}" onChange="{{{{ on.oQty }}}}" inputmode="decimal" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
                 </div>
                 <div style="font-size:15px;font-weight:700;color:#1F4221">{{{{ offerTotal }}}}</div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -360,6 +360,9 @@ rep('''      <sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}">''',
       <sc-if value="{{ hasErr }}" hint-placeholder-val="{{ false }}">''')
 
 rep('src="assets/founder-milk-seller.png"', 'src="assets/founder-milk-seller.jpg"')
+
+# ---- labels with a binding inside a flex column need one wrapper ----
+rep('color:#3E4A3C">Price ({{ cx.code }}) *<input', 'color:#3E4A3C"><span>Price ({{ cx.code }}) *</span><input')
 
 # ---- swap in the new logic ----
 start = src.index('<script type="text/x-dc" data-dc-script')
