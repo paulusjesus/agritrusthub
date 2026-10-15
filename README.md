@@ -36,11 +36,28 @@ Every page has its own address, so the back button works and links can be shared
 
 Team members open it at `/app/admin` after signing in. It lists call requests, contact messages, buyer requests, loan applications, truck requests, QualityScan photos to grade, disputes and theft reports, each with a status and a note. Members are told in their notifications when the team updates their request. The Members tab can give someone a temporary password over the phone.
 
-Only phone numbers on the team list can open it. To add someone, run this in the Supabase SQL editor with their number in international form:
+Only people on the team list can open it. The team member signs up on the site first. Then run this in the Supabase SQL editor with their number in international form, and check that the name it shows is really them:
 
 ```sql
-insert into agritrust.admin_phones (phone, note) values ('264811234567', 'Name');
+insert into agritrust.admin_phones (phone, note, user_id)
+select pp.phone, p.full_name, pp.id
+from agritrust.profile_private pp join agritrust.profiles p using (id)
+where pp.phone = '264811234567'
+returning phone, note;
 ```
+
+The row is tied to that account, so registering the same number again later does not give anyone else access.
+
+## Backups
+
+Every Sunday at 03:00 Windhoek time a full copy of the AgriTRUST records is saved inside the database (the `agritrust-weekly-backup` job). Team admins see the copies under Backups on the admin page, can take a copy straight away and can download any copy as a file to keep in Google Drive. Photos are not in the copy; they stay in the `agritrust` storage bucket.
+
+## Security
+
+* Members can only change the columns the app edits. Nobody can change their own phone number, give a listing a grade, edit another person's chat message or mark a deal signed on their own.
+* Admin access is tied to the account as well as the phone number.
+* Sign-up allows 10 attempts an hour from one connection, and the public forms slow down if they are flooded.
+* Sign-up does not check the phone number by SMS yet, so treat a new account's number as unconfirmed until an agent has spoken to the person.
 
 ## Making changes
 

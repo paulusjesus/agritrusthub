@@ -529,6 +529,12 @@ ADMIN = f'''
             <button onClick="{{{{ adminRefresh }}}}" style="border:1px solid #D6D1BF;cursor:pointer;background:#fff;color:#1C2A1D;font-size:14.5px;font-weight:600;padding:10px 16px;border-radius:6px">Refresh</button>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{{{ adminTabs }}}}" as="t" hint-placeholder-count="6"><button onClick="{{{{ t.onClick }}}}" style="border:1px solid {{{{ t.border }}}};background:{{{{ t.bg }}}};color:{{{{ t.color }}}};font-size:14px;font-weight:600;padding:8px 14px;border-radius:6px;cursor:pointer">{{{{ t.label }}}}</button></sc-for></div>
+          <sc-if value="{{{{ adminIsBackups }}}}" hint-placeholder-val="{{{{ false }}}}">
+            <div style="background:#F3F7EA;border:1px solid #DCE8C6;border-radius:8px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
+              <p style="margin:0;font-size:14.5px;line-height:1.55;color:#3E4A3C;max-width:640px">A full copy of every AgriTRUST record is saved each Sunday at 03:00. Download one now and then and keep it in Google Drive, so there is always a copy outside Supabase. Photos are kept separately in Supabase storage.</p>
+              <button onClick="{{{{ backupNow }}}}" style="border:0;cursor:pointer;background:#2E5E2F;color:#fff;font-size:14px;font-weight:600;padding:10px 16px;border-radius:6px">Take a copy now</button>
+            </div>
+          </sc-if>
           <sc-if value="{{{{ adminLoading }}}}" hint-placeholder-val="{{{{ false }}}}"><div style="color:#5B6657">Loading…</div></sc-if>
           <sc-if value="{{{{ adminEmpty }}}}" hint-placeholder-val="{{{{ false }}}}"><div style="background:#fff;border:1px dashed #D6D1BF;border-radius:8px;padding:32px;text-align:center;color:#5B6657">Nothing here yet.</div></sc-if>
           <sc-for list="{{{{ adminItems }}}}" as="it" hint-placeholder-count="3">
@@ -543,6 +549,7 @@ ADMIN = f'''
                   <button onClick="{{{{ it.save }}}}" style="border:0;cursor:pointer;background:#2E5E2F;color:#fff;font-size:14px;font-weight:600;padding:10px 16px;border-radius:6px">Save</button>
                 </div>
               </sc-if>
+              <sc-if value="{{{{ it.isBackup }}}}" hint-placeholder-val="{{{{ false }}}}"><button onClick="{{{{ it.download }}}}" style="align-self:flex-start;border:1px solid #D6D1BF;cursor:pointer;background:#fff;color:#1C2A1D;font-size:14px;font-weight:600;padding:9px 14px;border-radius:6px">Download this copy</button></sc-if>
               <sc-if value="{{{{ it.isMember }}}}" hint-placeholder-val="{{{{ false }}}}"><button onClick="{{{{ it.reset }}}}" style="align-self:flex-start;border:1px solid #D6D1BF;cursor:pointer;background:#fff;color:#1C2A1D;font-size:14px;font-weight:600;padding:9px 14px;border-radius:6px">Give a temporary password</button></sc-if>
             </div>
           </sc-for>
@@ -573,6 +580,33 @@ rep('''<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">''', f''
 # ---- centre every platform screen in the space beside the menu ----
 src = src.replace('max-width:1180px', 'max-width:1180px;width:100%;margin-left:auto;margin-right:auto')
 rep('gap:18px;max-width:820px">', 'gap:18px;max-width:820px;width:100%;margin-left:auto;margin-right:auto">')
+
+# ---- phones: bigger touch areas on small text buttons, without moving anything ----
+src = src.replace('background:transparent;padding:0;cursor:pointer', 'background:transparent;padding:10px 0;margin:-10px 0;cursor:pointer')
+src = src.replace('background:transparent;cursor:pointer;padding:0;font-size:14px', 'background:transparent;cursor:pointer;padding:10px 6px;margin:-10px -6px;font-size:14px')
+
+# ---- messages: say something when there are no chats yet ----
+rep("""              </sc-for>
+            </div>
+          </div>
+          <div style="display:{{ msgThreadD }}""", """              </sc-for>
+              <sc-if value="{{ noThreads }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;padding:10px 10px 16px">
+                  <p style="margin:0;font-size:15px;line-height:1.5;color:#5B6657">No chats yet. When you make an offer or message a seller, the conversation shows up here.</p>
+                  <button onClick="{{ goMarket }}" style="border:0;background:#2E5E2F;color:#fff;border-radius:6px;padding:12px 16px;font-size:15px;font-weight:600;cursor:pointer">Browse the Marketplace</button>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+          <div style="display:{{ msgThreadD }}""")
+
+# ---- phones: number keypad for phone numbers ----
+src = src.replace('onChange="{{ on.siPhone }}"', 'onChange="{{ on.siPhone }}" type="tel" inputmode="tel" autocomplete="username"')
+for k in ('suPhone', 'cPhone', 'mPhone'):
+    src = src.replace('onChange="{{ on.%s }}"' % k, 'onChange="{{ on.%s }}" type="tel" inputmode="tel" autocomplete="tel"' % k)
+
+# ---- phones: two-column form rows must shrink to the screen ----
+src = src.replace('grid-template-columns:1fr 1fr;gap:10px', 'grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px')
 
 # ---- swap in the new logic ----
 start = src.index('<script type="text/x-dc" data-dc-script')
