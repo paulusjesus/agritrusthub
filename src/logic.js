@@ -158,7 +158,7 @@ class Component extends DCLogic {
   }
   async enterLive(uid) {
     this.setState({ live: true, demo: false, guest: false, me: uid, ...EMPTY, saved: {}, liked: {}, offered: {}, requested: {}, seen: {} });
-    await this.reload();
+    this.reload();
     window.AT.subscribe(uid, () => { clearTimeout(this._rl); this._rl = setTimeout(() => this.reload(), 400); });
   }
   leaveLive() {
@@ -359,25 +359,25 @@ class Component extends DCLogic {
         const img = s.mFile ? await AT.upload(s.me, 'listings', s.mFile) : null;
         await AT.insert('listings', { name: s.mTitle.trim(), cat: s.mCat, region: s.mRegion, price: Math.round(num(s.mPrice) / this.rate() * 100) / 100, unit: s.mUnit, qty: num(s.mQty), img }, 'Your listing did not save. Please try again.');
         this.setState({ modal: null, cat: 'All', q: '', mImg: '', mFile: null });
-        await this.reload(); this.go('market');
+        this.go('market'); this.reload();
       }, 'Your listing is live on the Marketplace.');
     }
     if (s.modal === 'post') {
       if (!this.need('mTitle', 'mBody')) return;
-      return this.run(async () => { await AT.insert('posts', { tag: s.mTag, title: s.mTitle.trim(), body: s.mBody.trim() }); this.setState({ modal: null }); await this.reload(); }, 'Posted to the Community.');
+      return this.run(async () => { await AT.insert('posts', { tag: s.mTag, title: s.mTitle.trim(), body: s.mBody.trim() }); this.setState({ modal: null }); this.reload(); }, 'Posted to the Community.');
     }
     if (s.modal === 'barter') {
       if (!this.need('mHave', 'mWant')) return;
-      return this.run(async () => { await AT.insert('barters', { have: s.mHave.trim(), want: s.mWant.trim(), region: s.mRegion }); this.setState({ modal: null }); await this.reload(); }, 'Barter request posted.');
+      return this.run(async () => { await AT.insert('barters', { have: s.mHave.trim(), want: s.mWant.trim(), region: s.mRegion }); this.setState({ modal: null }); this.reload(); }, 'Barter request posted.');
     }
     if (s.modal === 'dispute') {
       if (!this.need('mItem', 'mDesc')) return;
       const ref = 'DS-' + String(Date.now()).slice(-6);
-      return this.run(async () => { await AT.insert('disputes', { ref, deal: s.mItem.trim(), reason: s.mReason, description: s.mDesc.trim() }); this.setState({ modal: null }); await this.reload(); }, `Dispute ${ref} opened. We will reply within two working days.`);
+      return this.run(async () => { await AT.insert('disputes', { ref, deal: s.mItem.trim(), reason: s.mReason, description: s.mDesc.trim() }); this.setState({ modal: null }); this.reload(); }, `Dispute ${ref} opened. We will reply within two working days.`);
     }
     if (s.modal === 'theft') {
       if (!this.need('mItem', 'mPlace')) return;
-      return this.run(async () => { await AT.insert('theft_alerts', { what: s.mItem.trim(), place: s.mPlace.trim(), details: s.mDesc.trim() || null }); this.setState({ modal: null }); await this.reload(); }, 'Alert sent to AgriTRUST members in your region.');
+      return this.run(async () => { await AT.insert('theft_alerts', { what: s.mItem.trim(), place: s.mPlace.trim(), details: s.mDesc.trim() || null }); this.setState({ modal: null }); this.reload(); }, 'Alert sent to AgriTRUST members in your region.');
     }
     if (s.modal === 'agent') {
       if (!this.need('mName', 'mPhone')) return;
@@ -386,7 +386,7 @@ class Component extends DCLogic {
     if (s.modal === 'land') {
       if (!this.need('mPlace', 'mHa')) return;
       if (!(num(s.mHa) > 0)) return this.setState({ err: 'Hectares must be a number above zero.' });
-      return this.run(async () => { await AT.insert('lands', { place: s.mPlace.trim(), ha: num(s.mHa), features: s.mDesc.trim() || null, terms: s.mTerms }); this.setState({ modal: null }); await this.reload(); }, 'Your land is listed. Farmers can now ask to farm it.');
+      return this.run(async () => { await AT.insert('lands', { place: s.mPlace.trim(), ha: num(s.mHa), features: s.mDesc.trim() || null, terms: s.mTerms }); this.setState({ modal: null }); this.reload(); }, 'Your land is listed. Farmers can now ask to farm it.');
     }
     if (s.modal === 'password') {
       if (String(s.mPass).length < 8) return this.setState({ err: 'Your new password needs at least 8 characters.' });
@@ -394,12 +394,12 @@ class Component extends DCLogic {
     }
     if (s.modal === 'mine') {
       const l = s.manage; if (!l) return this.close();
-      return this.run(async () => { await AT.update('listings', { id: l.id }, { status: 'sold' }); this.setState({ modal: null, manage: null }); await this.reload(); }, 'Marked as sold. The listing is no longer shown to buyers.');
+      return this.run(async () => { await AT.update('listings', { id: l.id }, { status: 'sold' }); this.setState({ modal: null, manage: null }); this.reload(); }, 'Marked as sold. The listing is no longer shown to buyers.');
     }
   }
   removeListing = () => {
     const l = this.state.manage; if (!l || !this.state.live) return this.close();
-    this.run(async () => { await window.AT.update('listings', { id: l.id }, { status: 'removed' }); this.setState({ modal: null, manage: null }); await this.reload(); }, 'Listing removed.');
+    this.run(async () => { await window.AT.update('listings', { id: l.id }, { status: 'removed' }); this.setState({ modal: null, manage: null }); this.reload(); }, 'Listing removed.');
   };
 
   // ---------- live DealWise ----------
@@ -412,7 +412,7 @@ class Component extends DCLogic {
     this.run(async () => {
       await window.AT.insert('offers', { listing_id: l.id, seller: l.sellerId, price: Math.round(price / this.rate() * 100) / 100, qty }, 'Your offer did not send. Please try again.');
       this.setState({ dealId: null, oPrice: '', oQty: '' });
-      await this.reload();
+      this.reload();
     }, 'Offer sent to ' + l.seller + '. You will see their reply here and in your notifications.');
   };
   offerAction(o, action) {
@@ -425,10 +425,10 @@ class Component extends DCLogic {
     if (action === 'counter') {
       const v = +String(this.state.counters[o.id] || '').replace(/,/g, '');
       if (!(v > 0)) return this.say('Enter your counter price first.');
-      return this.run(async () => { await AT.update('offers', { id: o.id }, { price: Math.round(v / this.rate() * 100) / 100, status: 'countered' }); this.setState((st) => ({ counters: { ...st.counters, [o.id]: '' } })); await this.reload(); }, 'Counter-offer sent.');
+      return this.run(async () => { await AT.update('offers', { id: o.id }, { price: Math.round(v / this.rate() * 100) / 100, status: 'countered' }); this.setState((st) => ({ counters: { ...st.counters, [o.id]: '' } })); this.reload(); }, 'Counter-offer sent.');
     }
     const msg = { accept: 'Terms agreed. Both of you can now sign the agreement.', decline: 'Offer declined. Your listing stays live.', withdraw: 'Offer withdrawn.', sign: 'You signed the agreement.' }[action];
-    this.run(async () => { await AT.update('offers', { id: o.id }, patch); await this.reload(); }, msg);
+    this.run(async () => { await AT.update('offers', { id: o.id }, patch); this.reload(); }, msg);
   }
 
   renderVals() {
@@ -466,7 +466,7 @@ class Component extends DCLogic {
       footCols: pick('1fr 1fr', '2fr 1fr 1fr 1fr', '2fr 1fr 1fr 1fr'),
     };
     const A = {
-      pad: pick('16px', '24px', '28px'), mainPad: pick('20px 16px', '24px', '32px 36px'),
+      pad: pick('16px', '24px', '28px'), mainPad: w >= 1640 ? '32px 284px 32px 36px' : pick('20px 16px', '24px', '32px 36px'),
       side: desk ? 'flex' : 'none', tabs: tab ? 'flex' : 'none', bottom: mob ? 'flex' : 'none', deskInline: mob ? 'none' : 'inline-flex', brandTxt: mob ? 'none' : 'inline', kpiFs: mob ? '20px' : '26px', msgCols: mob ? 'minmax(0,1fr)' : '320px minmax(0,1fr)', msgH: mob ? '560px' : '620px', two: mob ? '1fr' : '1fr 1fr', topBtnW: mob ? '44px' : '92px', bellW: mob ? '32px' : '40px', avW: mob ? '34px' : '40px', bellGap: mob ? '4px' : '10px', topFs: mob ? '11px' : '12px', mobOnly: mob ? 'inline' : 'none', topCols: mob ? '0px auto minmax(0,1fr)' : 'minmax(0,1fr) auto minmax(0,1fr)', topGap: mob ? '0px' : (tab ? '18px' : '30px'),
       h1: pick('28px', '34px', '38px'), kpi: 'repeat(2,minmax(0,1fr))', kpi4: mob ? 'repeat(2,minmax(0,1fr))' : 'repeat(4,minmax(0,1fr))',
       split: desk ? 'minmax(0,1.6fr) minmax(0,1fr)' : '1fr', half: mob ? '1fr' : 'repeat(2,minmax(0,1fr))',
@@ -544,7 +544,7 @@ class Component extends DCLogic {
     // Live DealWise
     const dl = live ? s.listings.find((l) => l.id === s.dealId && !l.mine) : null;
     const similar = dl ? s.listings.filter((l) => l.id !== dl.id && l.cat === dl.cat && l.unit === dl.unit).map((l) => l.price) : [];
-    const ofStatus = { pending: 'Waiting for reply', countered: 'Counter-offer', agreed: 'Terms agreed', declined: 'Declined', withdrawn: 'Withdrawn', signed: 'Signed by both' };
+    const ofStatus = { pending: 'New offer', countered: 'Counter-offer', agreed: 'Terms agreed', declined: 'Declined', withdrawn: 'Withdrawn', signed: 'Signed by both' };
     const ofBg = { pending: '#F6EBC9', countered: '#F6EBC9', agreed: '#EAF1DC', signed: '#DCEBC4', declined: '#F4F1E6', withdrawn: '#F4F1E6' };
     const liveOffers = s.offers.map((o) => {
       const ln = o.listing || { name: 'Listing', unit: 'unit' };
@@ -857,7 +857,7 @@ class Component extends DCLogic {
       pickScan: (e) => { const f = e.target.files && e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => this.setState({ scImg: r.result, scFile: f }); r.readAsDataURL(f); },
       sendScan: () => {
         if (!s.scFile) return this.say('Add a photo of your sample first.');
-        this.run(async () => { const url = await window.AT.upload(s.me, 'scans', s.scFile); await window.AT.insert('scan_requests', { crop: s.crop, img: url }); this.setState({ scImg: '', scFile: null }); await this.reload(); }, 'Photo sent. We will add the grade here and let you know.');
+        this.run(async () => { const url = await window.AT.upload(s.me, 'scans', s.scFile); await window.AT.insert('scan_requests', { crop: s.crop, img: url }); this.setState({ scImg: '', scFile: null }); this.reload(); }, 'Photo sent. We will add the grade here and let you know.');
       },
       scans: s.scans, hasScans: s.scans.length > 0,
       arrs: Object.keys(arrMap).map((k) => ({ label: arrMap[k][0], onClick: () => this.setState({ arr: k }), ...chip(s.arr === k) })), arrText: arrMap[s.arr][1], lands, noLands: live && !lands.length,
@@ -868,7 +868,7 @@ class Component extends DCLogic {
       harvests: harvestsData.map((h, i) => ({ label: h[0], onClick: () => this.setState({ hIdx: i }), ...chip(s.hIdx === i) })),
       applyLoan: () => {
         if (!live) { this.setState({ loans: [{ id: Date.now(), label: 'New loan', amount: s.amount, repay: s.amount + interest, harvest: hs[0], status: 'Under review' }, ...s.loans] }); this.act(`Harvest Finance application: ${this.money(s.amount)}`, '#1F4221'); return this.say('Application sent. Most decisions come back within a day.'); }
-        this.run(async () => { await window.AT.insert('loan_applications', { amount: s.amount, repay: s.amount + interest, harvest: hs[0] }); await this.reload(); }, 'Application saved. We will call you to talk it through.');
+        this.run(async () => { await window.AT.insert('loan_applications', { amount: s.amount, repay: s.amount + interest, harvest: hs[0] }); this.reload(); }, 'Application saved. We will call you to talk it through.');
       },
       loans: s.loans.map((l) => ({ ...l, amt: this.money(l.amount), rep: this.money(l.repay), bg: statusC(l.status === 'Active' ? 'Resolved' : l.status) })), noLoans: live && !s.loans.length,
       posts, noPosts: live && !posts.length, rsvp: s.rsvp, rsvpBtn: s.rsvp ? 'You’re going ✓' : 'I’ll be there', toggleRsvp: () => { this.setState({ rsvp: !s.rsvp }); if (!s.rsvp) this.say('See you in Ondangwa on 17 October.'); },
@@ -888,7 +888,7 @@ class Component extends DCLogic {
         const ref = 'AH-' + String(Date.now()).slice(-6);
         if (live) {
           if (!s.hFrom.trim()) return this.say('Where should the truck collect from?');
-          return this.run(async () => { await window.AT.insert('haul_requests', { ref, origin: s.hFrom.trim(), destination: s.hTo, load_kg: +s.hLoad, pickup: s.hDate, estimate: quote }); await this.reload(); }, 'Request ' + ref + ' sent. We will call you to confirm a transporter.');
+          return this.run(async () => { await window.AT.insert('haul_requests', { ref, origin: s.hFrom.trim(), destination: s.hTo, load_kg: +s.hLoad, pickup: s.hDate, estimate: quote }); this.reload(); }, 'Request ' + ref + ' sent. We will call you to confirm a transporter.');
         }
         this.setState({ bookings: [{ id: ref, route: `${s.hFrom || 'Tsumeb'} to ${s.hTo}`, load: (+s.hLoad).toLocaleString('en-US') + ' kg', date: s.hDate, cost: this.money(quote), status: 'Driver assigned' }, ...s.bookings] }); this.act(`Truck booked to ${s.hTo}, ${s.hDate}`, '#5E8A3C'); this.say(`Booked. Reference ${ref}.`);
       },
@@ -898,7 +898,7 @@ class Component extends DCLogic {
       typeTabs: [['in', 'Income'], ['out', 'Cost']].map(([id, label]) => ({ label, onClick: () => this.setState({ aType: id }), ...chip(s.aType === id) })),
       addEntry: () => {
         if (!s.aDesc.trim() || !(+s.aAmt > 0)) return this.say('Add a description and an amount.');
-        if (live) return this.run(async () => { await window.AT.insert('entries', { type: s.aType, description: s.aDesc.trim(), amount: Math.round(+s.aAmt / this.rate() * 100) / 100 }); this.setState({ aDesc: '', aAmt: '' }); await this.reload(); }, 'Entry saved.');
+        if (live) return this.run(async () => { await window.AT.insert('entries', { type: s.aType, description: s.aDesc.trim(), amount: Math.round(+s.aAmt / this.rate() * 100) / 100 }); this.setState({ aDesc: '', aAmt: '' }); this.reload(); }, 'Entry saved.');
         this.setState({ entries: [{ id: Date.now(), type: s.aType, desc: s.aDesc, amount: +s.aAmt / this.rate(), date: 'Today' }, ...s.entries], aDesc: '', aAmt: '' }); this.say('Entry saved.');
       },
       courses, academySub: live ? 'Short courses you can do on your phone. We are writing them now, so pick the ones you want and we will tell you when each opens.' : 'Short courses you can do on your phone. Each one you finish adds to your FarmScore.',
