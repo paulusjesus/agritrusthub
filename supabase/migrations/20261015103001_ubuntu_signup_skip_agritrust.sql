@@ -1,0 +1,10 @@
+-- AgriTRUST shares the Supabase project (and its login list) with Ubuntu Finance.
+-- Ubuntu Finance's public.handle_new_user() trigger was changed so that it returns
+-- early for AgriTRUST sign-ups. The only line added at the top of the function body:
+--
+--   if coalesce(new.raw_user_meta_data->>'app', '') = 'agritrust' then
+--     return new;
+--   end if;
+--
+-- AgriTRUST accounts are created by the agritrust-signup Edge Function with
+-- user_metadata.app = 'agritrust'.
