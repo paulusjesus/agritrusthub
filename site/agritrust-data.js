@@ -149,15 +149,24 @@
   }
 
   // Team queues for the admin page (row level security only returns rows to admins)
+  async function backupList() {
+    var r = await sb.rpc('backup_list'); fail(r.error); return r.data || [];
+  }
+  async function backupGet(id) {
+    var r = await sb.rpc('backup_get', { p_id: id }); fail(r.error, 'The copy did not download. Please try again.'); return r.data;
+  }
+  async function backupNow() {
+    var r = await sb.rpc('backup_now'); fail(r.error, 'The copy was not made. Please try again.'); return r.data;
+  }
   async function adminData() {
     var q = function (t, extra) { return sb.from(t).select(extra || '*').order('created_at', { ascending: false }).limit(200); };
     var res = await Promise.all([
       q('agent_requests'), q('contact_messages'), q('buyer_requests'), q('loan_applications'), q('haul_requests'),
-      q('scan_requests'), q('disputes'), q('theft_alerts'), sb.rpc('admin_members'),
+      q('scan_requests'), q('disputes'), q('theft_alerts'), sb.rpc('admin_members'), sb.rpc('backup_list'),
     ]);
     res.forEach(function (r) { fail(r.error); });
     var d = res.map(function (r) { return r.data || []; });
-    return { agents: d[0], contacts: d[1], buyers: d[2], loans: d[3], hauls: d[4], scans: d[5], disputes: d[6], thefts: d[7], members: d[8] };
+    return { agents: d[0], contacts: d[1], buyers: d[2], loans: d[3], hauls: d[4], scans: d[5], disputes: d[6], thefts: d[7], members: d[8], backups: d[9] };
   }
   async function adminReset(userId) {
     var s = await session();
@@ -219,6 +228,6 @@
     insert: insert, update: update, remove: remove, openThread: openThread,
     markThreadRead: markThreadRead, markNotificationsRead: markNotificationsRead,
     subscribe: subscribe, unsubscribe: unsubscribe,
-    replies: replies, adminData: adminData, adminReset: adminReset,
+    replies: replies, adminData: adminData, adminReset: adminReset, backupGet: backupGet, backupNow: backupNow,
   };
 })();

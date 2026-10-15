@@ -12,7 +12,7 @@
 <link rel="icon" href="/assets/agritrust-mark.png">
 <script>window.__AGRI_LIVE = 1; window.__resources = { "https://unpkg.com/react@18.3.1/umd/react.production.min.js": "/vendor/react.production.min.js", "https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js": "/vendor/react-dom.production.min.js" };</script>
 <script src="/vendor/supabase.min.js?v=2.116.0"></script>
-<script src="/agritrust-data.js?v=20261015f"></script>
+<script src="/agritrust-data.js?v=20261015h"></script>
 <link rel="preconnect" href="https://inwsyhopzbuvqjipvuhg.supabase.co" crossorigin>
 <script src="/support.js?v=1"></script>
 </head>
@@ -203,7 +203,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
         <div style="display:flex;flex-direction:column;gap:18px;font-size:16.5px;line-height:1.65;color:#3E4A3C">
           <p style="margin:0">We don't sell farmer data. Your yields, your land location and your loan history are shared only with the people you choose, for the deal you're doing.</p>
           <p style="margin:0">DealWise and QualityScan give you suggestions. You make the call. When the AI isn't sure, or a lot of money is at stake, a human agronomist or vet reviews it first.</p>
-          <button onClick="{{ goAbout }}" style="align-self:flex-start;border:0;background:transparent;padding:0;cursor:pointer;font-size:16px;font-weight:600;color:#2E5E2F">Read the Ethical AI and Data Charter →</button>
+          <button onClick="{{ goAbout }}" style="align-self:flex-start;border:0;background:transparent;padding:10px 0;margin:-10px 0;cursor:pointer;font-size:16px;font-weight:600;color:#2E5E2F">Read the Ethical AI and Data Charter →</button>
         </div>
       </div>
     </section>
@@ -333,7 +333,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
       <div style="display:flex;flex-direction:column;gap:14px;font-size:16.5px;line-height:1.65;color:#3E4A3C">
         <p style="margin:0">We never sell farmer, land or financial data. A lender sees your FarmScore only when you apply for a loan. A buyer sees your location only once a deal is agreed.</p>
         <p style="margin:0">While our AI tools are being trained, QualityScan grades come from people on our team. If you disagree with a grade, tell us and we will look again at no cost.</p>
-        <p style="margin:0">Ask us through the Contact page and we will send you a copy of everything we hold about you, or delete it. Our <button onClick="{{ goPrivacy }}" style="border:0;background:transparent;padding:0;cursor:pointer;font-size:16.5px;font-weight:600;color:#2E5E2F">privacy policy</button> explains the details.</p>
+        <p style="margin:0">Ask us through the Contact page and we will send you a copy of everything we hold about you, or delete it. Our <button onClick="{{ goPrivacy }}" style="border:0;background:transparent;padding:10px 0;margin:-10px 0;cursor:pointer;font-size:16.5px;font-weight:600;color:#2E5E2F">privacy policy</button> explains the details.</p>
       </div>
     </section>
   </div>
@@ -357,7 +357,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
           <div style="display:flex;flex-direction:column;gap:14px">
             <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Your name *<input value="{{ V.cName }}" onChange="{{ on.cName }}" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
             <div style="display:grid;grid-template-columns:{{ L.form2 }};gap:14px">
-              <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Phone<input value="{{ V.cPhone }}" onChange="{{ on.cPhone }}" placeholder="+264" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Phone<input value="{{ V.cPhone }}" onChange="{{ on.cPhone }}" type="tel" inputmode="tel" autocomplete="tel" placeholder="+264" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
               <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Region<select value="{{ V.cRegion }}" onChange="{{ on.cRegion }}" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px;background:#fff"><sc-for list="{{ regions }}" as="r"><option>{{ r }}</option></sc-for></select></label>
             </div>
             <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Message *<textarea value="{{ V.cMsg }}" onChange="{{ on.cMsg }}" rows="5" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px;resize:vertical"></textarea></label>
@@ -381,12 +381,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
     <div style="width:100%;max-width:440px;background:#fff;border:1px solid #E3DFD0;border-radius:8px;padding:30px;display:flex;flex-direction:column;gap:16px">
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><img src="/assets/agritrust-mark.png" alt="" style="height:52px"><span style="font:700 23px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;letter-spacing:-.01em"><span style="color:#7FA146">Agri</span><span style="color:#2E5E2F">TRUST</span></span></div>
       <h1 style="margin:0;font:700 30px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">Sign in</h1>
-      <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Phone number<input value="{{ V.siPhone }}" onChange="{{ on.siPhone }}" placeholder="+264 81 …" style="border:1px solid #D6D1BF;border-radius:6px;padding:13px 14px;font-size:15.5px"></label>
+      <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Phone number<input value="{{ V.siPhone }}" onChange="{{ on.siPhone }}" type="tel" inputmode="tel" autocomplete="username" placeholder="+264 81 …" style="border:1px solid #D6D1BF;border-radius:6px;padding:13px 14px;font-size:15.5px"></label>
       <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Password<input type="password" value="{{ V.siPass }}" onChange="{{ on.siPass }}" autocomplete="current-password" style="border:1px solid #D6D1BF;border-radius:6px;padding:13px 14px;font-size:15.5px"></label>
       <button onClick="{{ signIn }}" style="border:0;cursor:pointer;background:#2E5E2F;color:#fff;font-size:16px;font-weight:600;padding:14px;border-radius:6px">{{ lbl.signIn }}</button>
-      <button onClick="{{ forgot }}" style="align-self:flex-start;border:0;background:transparent;padding:0;cursor:pointer;font-size:14px;font-weight:600;color:#2E5E2F">Forgot your password?</button>
+      <button onClick="{{ forgot }}" style="align-self:flex-start;border:0;background:transparent;padding:10px 0;margin:-10px 0;cursor:pointer;font-size:14px;font-weight:600;color:#2E5E2F">Forgot your password?</button>
       <button onClick="{{ demoSignIn }}" style="border:1px solid #D6D1BF;cursor:pointer;background:#fff;color:#1C2A1D;font-size:15px;font-weight:600;padding:13px;border-radius:6px">Use the demo account</button>
-      <div style="font-size:14.5px;color:#5B6657">New here? <button onClick="{{ goSignup }}" style="border:0;background:transparent;padding:0;cursor:pointer;font-size:14.5px;font-weight:700;color:#2E5E2F">Create a free account</button></div>
+      <div style="font-size:14.5px;color:#5B6657">New here? <button onClick="{{ goSignup }}" style="border:0;background:transparent;padding:10px 0;margin:-10px 0;cursor:pointer;font-size:14.5px;font-weight:700;color:#2E5E2F">Create a free account</button></div>
     </div>
   </div>
   </sc-if>
@@ -410,13 +410,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
       </div>
       <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Full name *<input value="{{ V.suName }}" onChange="{{ on.suName }}" style="border:1px solid #D6D1BF;border-radius:6px;padding:13px 14px;font-size:15.5px"></label>
       <div style="display:grid;grid-template-columns:{{ L.form2 }};gap:14px">
-        <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Phone *<input value="{{ V.suPhone }}" onChange="{{ on.suPhone }}" placeholder="+264 81 …" style="border:1px solid #D6D1BF;border-radius:6px;padding:13px 14px;font-size:15.5px"></label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Phone *<input value="{{ V.suPhone }}" onChange="{{ on.suPhone }}" type="tel" inputmode="tel" autocomplete="tel" placeholder="+264 81 …" style="border:1px solid #D6D1BF;border-radius:6px;padding:13px 14px;font-size:15.5px"></label>
         <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Region<select value="{{ V.suRegion }}" onChange="{{ on.suRegion }}" style="border:1px solid #D6D1BF;border-radius:6px;padding:13px 14px;font-size:15.5px;background:#fff"><sc-for list="{{ regions }}" as="r"><option>{{ r }}</option></sc-for></select></label>
       </div>
       <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Choose a password *<input type="password" value="{{ V.suPass }}" onChange="{{ on.suPass }}" autocomplete="new-password" style="border:1px solid #D6D1BF;border-radius:6px;padding:13px 14px;font-size:15.5px"><span style="font-weight:400;font-size:12.5px;color:#6B7466">At least 8 characters. You will sign in with your phone number and this password.</span></label>
-      <p style="margin:0;font-size:13.5px;color:#5B6657;line-height:1.5">By creating an account you agree to our <button onClick="{{ goTerms }}" style="border:0;background:transparent;padding:0;cursor:pointer;font-size:13.5px;font-weight:600;color:#2E5E2F">terms of use</button> and <button onClick="{{ goPrivacy }}" style="border:0;background:transparent;padding:0;cursor:pointer;font-size:13.5px;font-weight:600;color:#2E5E2F">privacy policy</button>.</p>
+      <p style="margin:0;font-size:13.5px;color:#5B6657;line-height:1.5">By creating an account you agree to our <button onClick="{{ goTerms }}" style="border:0;background:transparent;padding:10px 0;margin:-10px 0;cursor:pointer;font-size:13.5px;font-weight:600;color:#2E5E2F">terms of use</button> and <button onClick="{{ goPrivacy }}" style="border:0;background:transparent;padding:10px 0;margin:-10px 0;cursor:pointer;font-size:13.5px;font-weight:600;color:#2E5E2F">privacy policy</button>.</p>
       <button onClick="{{ signUp }}" style="border:0;cursor:pointer;background:#2E5E2F;color:#fff;font-size:16px;font-weight:600;padding:14px;border-radius:6px">{{ lbl.signUp }}</button>
-      <div style="font-size:14.5px;color:#5B6657">Already registered? <button onClick="{{ goSignin }}" style="border:0;background:transparent;padding:0;cursor:pointer;font-size:14.5px;font-weight:700;color:#2E5E2F">Sign in</button></div>
+      <div style="font-size:14.5px;color:#5B6657">Already registered? <button onClick="{{ goSignin }}" style="border:0;background:transparent;padding:10px 0;margin:-10px 0;cursor:pointer;font-size:14.5px;font-weight:700;color:#2E5E2F">Sign in</button></div>
     </div>
   </div>
   </sc-if>
@@ -619,6 +619,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
                   <span style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none"><span style="font-size:12px;color:#7A8475">{{ t.time }}</span><span style="width:10px;height:10px;border-radius:50%;background:#D93A2B;display:{{ t.dot }}"></span></span>
                 </button>
               </sc-for>
+              <sc-if value="{{ noThreads }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start;padding:10px 10px 16px">
+                  <p style="margin:0;font-size:15px;line-height:1.5;color:#5B6657">No chats yet. When you make an offer or message a seller, the conversation shows up here.</p>
+                  <button onClick="{{ goMarket }}" style="border:0;background:#2E5E2F;color:#fff;border-radius:6px;padding:12px 16px;font-size:15px;font-weight:600;cursor:pointer">Browse the Marketplace</button>
+                </div>
+              </sc-if>
             </div>
           </div>
           <div style="display:{{ msgThreadD }};flex-direction:column;min-height:0;min-width:0">
@@ -1003,7 +1009,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
               <sc-if value="{{ scanDone }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;flex-direction:column;gap:14px">
                   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font:700 20px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">{{ crop }}</span><span style="font-size:14px;font-weight:700;background:#EAF1DC;color:#2E5E2F;padding:6px 12px;border-radius:4px">Grade A</span></div>
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
                     <div style="background:#F7F5EE;border-radius:6px;padding:14px"><div style="font-size:12.5px;color:#5B6657">Moisture estimate</div><div style="font:700 22px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">12.8%</div></div>
                     <div style="background:#F7F5EE;border-radius:6px;padding:14px"><div style="font-size:12.5px;color:#5B6657">Visible defects</div><div style="font:700 22px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">2%</div></div>
                     <div style="background:#F7F5EE;border-radius:6px;padding:14px"><div style="font-size:12.5px;color:#5B6657">Shelf life, hermetic bag</div><div style="font:700 22px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">~9 months</div></div>
@@ -1294,8 +1300,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
                   <div style="font-size:13.5px;color:#5B6657">{{ p.author }} · {{ p.date }}</div>
                   <p style="margin:0;font-size:15px;line-height:1.6;color:#3E4A3C">{{ p.body }}</p>
                   <div style="display:flex;gap:18px;padding-top:12px;border-top:1px solid #F0EDE2;font-size:14px">
-                    <button onClick="{{ p.like }}" style="border:0;background:transparent;cursor:pointer;padding:0;font-size:14px;font-weight:600;color:{{ p.likeColor }}">♥ {{ p.likes }}</button>
-                    <button onClick="{{ p.toggleReplies }}" style="border:0;background:transparent;cursor:pointer;padding:0;font-size:14px;font-weight:600;color:#2E5E2F">{{ p.replyBtn }}</button><span style="color:#7A8475;margin-left:auto">{{ p.meta }}</span>
+                    <button onClick="{{ p.like }}" style="border:0;background:transparent;cursor:pointer;padding:10px 6px;margin:-10px -6px;font-size:14px;font-weight:600;color:{{ p.likeColor }}">♥ {{ p.likes }}</button>
+                    <button onClick="{{ p.toggleReplies }}" style="border:0;background:transparent;cursor:pointer;padding:10px 6px;margin:-10px -6px;font-size:14px;font-weight:600;color:#2E5E2F">{{ p.replyBtn }}</button><span style="color:#7A8475;margin-left:auto">{{ p.meta }}</span>
                   </div>
                   <sc-if value="{{ p.open }}" hint-placeholder-val="{{ false }}">
                     <div style="display:flex;flex-direction:column;gap:10px;padding-top:4px">
@@ -1333,6 +1339,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
             <button onClick="{{ adminRefresh }}" style="border:1px solid #D6D1BF;cursor:pointer;background:#fff;color:#1C2A1D;font-size:14.5px;font-weight:600;padding:10px 16px;border-radius:6px">Refresh</button>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ adminTabs }}" as="t" hint-placeholder-count="6"><button onClick="{{ t.onClick }}" style="border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};font-size:14px;font-weight:600;padding:8px 14px;border-radius:6px;cursor:pointer">{{ t.label }}</button></sc-for></div>
+          <sc-if value="{{ adminIsBackups }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#F3F7EA;border:1px solid #DCE8C6;border-radius:8px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
+              <p style="margin:0;font-size:14.5px;line-height:1.55;color:#3E4A3C;max-width:640px">A full copy of every AgriTRUST record is saved each Sunday at 03:00. Download one now and then and keep it in Google Drive, so there is always a copy outside Supabase. Photos are kept separately in Supabase storage.</p>
+              <button onClick="{{ backupNow }}" style="border:0;cursor:pointer;background:#2E5E2F;color:#fff;font-size:14px;font-weight:600;padding:10px 16px;border-radius:6px">Take a copy now</button>
+            </div>
+          </sc-if>
           <sc-if value="{{ adminLoading }}" hint-placeholder-val="{{ false }}"><div style="color:#5B6657">Loading…</div></sc-if>
           <sc-if value="{{ adminEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px dashed #D6D1BF;border-radius:8px;padding:32px;text-align:center;color:#5B6657">Nothing here yet.</div></sc-if>
           <sc-for list="{{ adminItems }}" as="it" hint-placeholder-count="3">
@@ -1347,6 +1359,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
                   <button onClick="{{ it.save }}" style="border:0;cursor:pointer;background:#2E5E2F;color:#fff;font-size:14px;font-weight:600;padding:10px 16px;border-radius:6px">Save</button>
                 </div>
               </sc-if>
+              <sc-if value="{{ it.isBackup }}" hint-placeholder-val="{{ false }}"><button onClick="{{ it.download }}" style="align-self:flex-start;border:1px solid #D6D1BF;cursor:pointer;background:#fff;color:#1C2A1D;font-size:14px;font-weight:600;padding:9px 14px;border-radius:6px">Download this copy</button></sc-if>
               <sc-if value="{{ it.isMember }}" hint-placeholder-val="{{ false }}"><button onClick="{{ it.reset }}" style="align-self:flex-start;border:1px solid #D6D1BF;cursor:pointer;background:#fff;color:#1C2A1D;font-size:14px;font-weight:600;padding:9px 14px;border-radius:6px">Give a temporary password</button></sc-if>
             </div>
           </sc-for>
@@ -1393,7 +1406,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
               <span style="display:flex;flex-direction:column;gap:3px"><span style="color:#2E5E2F">{{ imgLabel }}</span><span style="font-weight:400;font-size:13px;color:#6B7466">JPG or PNG. A clear photo in daylight sells faster.</span></span>
             </label>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
             <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Category<select value="{{ V.mCat }}" onChange="{{ on.mCat }}" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px;font-size:15px;background:#fff"><option>Grains</option><option>Legumes</option><option>Vegetables</option><option>Fruit</option><option>Livestock</option><option>Poultry</option><option>Honey</option><option>Feed</option><option>Equipment</option></select></label>
             <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Region<select value="{{ V.mRegion }}" onChange="{{ on.mRegion }}" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px;font-size:15px;background:#fff"><sc-for list="{{ regions }}" as="r"><option>{{ r }}</option></sc-for></select></label>
             <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C"><span>Price ({{ cx.code }}) *</span><input value="{{ V.mPrice }}" onChange="{{ on.mPrice }}" inputmode="decimal" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
@@ -1439,7 +1452,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
         <div style="display:flex;flex-direction:column;gap:12px">
           <p style="margin:0;font-size:14.5px;color:#4F5A4B;line-height:1.55">Agents help with sign-up, Farm Passports and your first listing. There's no charge.</p>
           <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Your name *<input value="{{ V.mName }}" onChange="{{ on.mName }}" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
-          <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Phone *<input value="{{ V.mPhone }}" onChange="{{ on.mPhone }}" placeholder="+264 81 …" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Phone *<input value="{{ V.mPhone }}" onChange="{{ on.mPhone }}" type="tel" inputmode="tel" autocomplete="tel" placeholder="+264 81 …" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
           <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Region<select value="{{ V.mRegion }}" onChange="{{ on.mRegion }}" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px;font-size:15px;background:#fff"><sc-for list="{{ regions }}" as="r"><option>{{ r }}</option></sc-for></select></label>
         </div>
       </sc-if>
@@ -1447,7 +1460,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #9BBC5F;outline-offset
       <sc-if value="{{ MD.land }}" hint-placeholder-val="{{ false }}">
         <div style="display:flex;flex-direction:column;gap:12px">
           <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Location *<input value="{{ V.mPlace }}" onChange="{{ on.mPlace }}" placeholder="e.g. Outapi, Omusati" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
             <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Hectares *<input value="{{ V.mHa }}" onChange="{{ on.mHa }}" inputmode="decimal" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px 14px;font-size:15px"></label>
             <label style="display:flex;flex-direction:column;gap:6px;font-size:13.5px;font-weight:600;color:#3E4A3C">Terms<select value="{{ V.mTerms }}" onChange="{{ on.mTerms }}" style="border:1px solid #D6D1BF;border-radius:6px;padding:12px;font-size:15px;background:#fff"><option>Harvest share, 25%</option><option>{{ cx.rent }}</option><option>Profit share, 40%</option></select></label>
           </div>
@@ -1736,6 +1749,17 @@ class Component extends DCLogic {
   }
   async loadAdmin() {
     try { const d = await window.AT.adminData(); this.setState({ adminData: d }); } catch (e) { this.say(e.message); }
+  }
+  downloadBackup(r) {
+    this.run(async () => {
+      const data = await window.AT.backupGet(r.id);
+      const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'agritrust-backup-' + String(r.taken_at).slice(0, 10) + '.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }, 'Downloaded. Keep it somewhere safe, such as Google Drive.');
   }
   async loadReplies(postId) {
     try {
@@ -2361,7 +2385,7 @@ class Component extends DCLogic {
       onUser: (e) => this.setState({ user: e.target.value }), prPhone: s.prPhone, onPrPhone: (e) => (live ? this.say('Your phone number is how you sign in. Ask an agent if it needs to change.') : this.setState({ prPhone: e.target.value })),
       prRegion: s.prRegion, onPrRegion: (e) => this.setState({ prRegion: e.target.value }), prLang: s.prLang, onPrLang: (e) => this.setState({ prLang: e.target.value }),
       langs: ['English', 'Oshiwambo', 'Afrikaans', 'Otjiherero', 'Rukwangali', 'German'], langNote: s.prLang === 'English' ? 'AgriTRUST is in English for now.' : 'AgriTRUST is in English for now. We save your choice so we know which languages to add first.',
-      ntToggles: [['offers', 'Offers and messages', 'When a buyer makes an offer or sends a chat'], ['pay', 'Payments and escrow', 'When funds are held or released'], ['theft', 'Theft alerts near me', 'Stolen livestock or equipment in your region'], ['tips', 'Farming tips', 'New Academy lessons and market prices']].map(([id, label, d]) => ({ label, d, track: s.nt[id] ? '#2E5E2F' : '#D6D1BF', jc: s.nt[id] ? 'flex-end' : 'flex-start', onClick: () => this.setState({ nt: { ...s.nt, [id]: !s.nt[id] } }) })),
+      ntToggles: [['offers', 'Offers and messages', 'When a buyer makes an offer or sends a chat'], ['pay', 'Deals and payments', 'When a deal is signed or a payment is recorded'], ['theft', 'Theft alerts near me', 'Stolen livestock or equipment in your region'], ['tips', 'Farming tips', 'New Academy lessons and market prices']].map(([id, label, d]) => ({ label, d, track: s.nt[id] ? '#2E5E2F' : '#D6D1BF', jc: s.nt[id] ? 'flex-end' : 'flex-start', onClick: () => this.setState({ nt: { ...s.nt, [id]: !s.nt[id] } }) })),
       chToggles: [['sms', 'SMS', 'Works on any phone, no data needed'], ['wa', 'WhatsApp', 'Messages to ' + s.prPhone], ['email', 'Email', 'Weekly summary of your sales']].map(([id, label, d]) => ({ label, d, track: s.chn[id] ? '#2E5E2F' : '#D6D1BF', jc: s.chn[id] ? 'flex-end' : 'flex-start', onClick: () => this.setState({ chn: { ...s.chn, [id]: !s.chn[id] } }) })),
       changePin: () => (live ? this.open('password') : this.say('We sent a reset code to ' + s.prPhone + '.')), twoFaLabel: s.twoFa ? 'Turn off 2-step sign-in' : 'Turn on 2-step sign-in',
       toggle2fa: () => { this.setState({ twoFa: !s.twoFa }); this.say(s.twoFa ? '2-step sign-in turned off.' : '2-step sign-in is on.'); },
@@ -2406,6 +2430,7 @@ class Component extends DCLogic {
       isTyping: !live && s.typing === curT.id, draft: s.draft, onDraft: (e) => this.setState({ draft: e.target.value }),
       draftKey: (e) => { if (e.key === 'Enter') this.sendMsg(); }, sendMsg: () => this.sendMsg(), backToList: () => this.setState({ thread: null }),
       openThreadTool: () => this.go(curT.go),
+      noThreads: s.threads.length === 0,
       msgListD: mob && s.thread ? 'none' : 'flex', msgThreadD: mob && !s.thread ? 'none' : 'flex',
       notifs: live
         ? (notifRows.length ? notifRows : [{ id: 0, title: 'Welcome', body: 'Offers, messages and alerts will show up here.', created_at: new Date().toISOString(), read: true, go: 'dashboard', kind: 'info' }]).map((n) => ({ ini: initialsOf(n.title), t: n.title + ': ' + n.body, d: ago(n.created_at), bg: { offer: '#2E5E2F', message: '#7FA146', theft: '#C0392B', barter: '#5E8A3C', land: '#8C7431' }[n.kind] || '#5B6657', fw: n.read ? 400 : 700, dc: n.read ? '#6B7466' : '#2E5E2F', dot: n.read ? 'none' : 'block', onClick: () => { this.setState({ panel: null }); this.go(n.go || 'dashboard'); } }))
@@ -2531,6 +2556,9 @@ class Component extends DCLogic {
         view: (r) => ({ title: r.ref + ' · ' + r.deal, lines: [r.reason + '. ' + r.description, who(r.owner) + ' · ' + ago(r.created_at)] }) },
       thefts: { label: 'Theft reports', table: 'theft_alerts', rows: d ? d.thefts : [], open: (r) => r.status === 'Open', statuses: ['Open', 'Police notified', 'Recovered', 'Closed'],
         view: (r) => ({ title: r.what, lines: [r.place + (r.details ? ' · ' + r.details : ''), who(r.owner) + ' · ' + ago(r.created_at)] }) },
+      backups: { label: 'Backups', rows: d ? d.backups || [] : [], open: () => false,
+        view: (r) => { const c = r.counts || {}; return { title: 'Copy of ' + new Date(r.taken_at).toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          lines: [[['profiles', 'member'], ['listings', 'listing'], ['offers', 'offer'], ['messages', 'message'], ['posts', 'post']].map(([k, w]) => (c[k] || 0) + ' ' + w + ((c[k] || 0) === 1 ? '' : 's')).join(' · '), Math.max(1, Math.round(r.bytes / 1024)) + ' KB'] }; } },
       members: { label: 'Members', rows: d ? d.members : [], open: () => false,
         view: (r) => ({ title: r.full_name || 'No name', lines: [window.AT.prettyPhone(r.phone) + ' · ' + r.region, r.roles + ' · joined ' + ago(r.created_at)] }) },
     };
@@ -2543,7 +2571,8 @@ class Component extends DCLogic {
       const setEd = (patch) => this.setState((st) => ({ adminEdit: { ...st.adminEdit, [key]: { ...(st.adminEdit[key] || {}), ...patch } } }));
       return {
         title: v.title, lines: v.lines.filter(Boolean).map((x) => ({ t: x })), hasImg: !!v.img, img: v.img || '', isOpen: t.open(r), badge: t.open(r) ? 'Needs action' : (r.status || ''), badgeBg: t.open(r) ? '#F6EBC9' : '#EAF1DC',
-        isQueue: tab !== 'members', isMember: tab === 'members',
+        isQueue: tab !== 'members' && tab !== 'backups', isMember: tab === 'members', isBackup: tab === 'backups',
+        download: () => this.downloadBackup(r),
         statuses: (t.statuses || []).map((x) => ({ v: x })), status, onStatus: (e) => setEd({ status: e.target.value }),
         hasNote: !!t.note, note, noteLabel: t.noteLabel || 'Team note (the member sees notes on loans, trucks and disputes)', onNote: (e) => setEd({ note: e.target.value }),
         save: () => {
@@ -2556,6 +2585,7 @@ class Component extends DCLogic {
     });
     return {
       adminTabs, adminItems, adminEmpty: !!d && !adminItems.length, adminLoading: !d, adminRefresh: () => this.loadAdmin(),
+      adminIsBackups: tab === 'backups', backupNow: () => this.run(async () => { await window.AT.backupNow(); await this.loadAdmin(); }, 'A new copy has been saved.'),
       tempPw: s.tempPw || {}, hasTempPw: !!s.tempPw, closeTempPw: () => this.setState({ tempPw: null }),
     };
   }
