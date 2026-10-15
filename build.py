@@ -364,6 +364,212 @@ rep('src="assets/founder-milk-seller.png"', 'src="assets/founder-milk-seller.jpg
 # ---- labels with a binding inside a flex column need one wrapper ----
 rep('color:#3E4A3C">Price ({{ cx.code }}) *<input', 'color:#3E4A3C"><span>Price ({{ cx.code }}) *</span><input')
 
+# ---- absolute paths so deep links like /listing/12 load correctly ----
+src = src.replace('src="assets/', 'src="/assets/').replace('href="assets/', 'href="/assets/')
+rep('"vendor/react.production.min.js"', '"/vendor/react.production.min.js"')
+rep('"vendor/react-dom.production.min.js"', '"/vendor/react-dom.production.min.js"')
+rep('<script src="vendor/supabase.min.js', '<script src="/vendor/supabase.min.js')
+rep('<script src="agritrust-data.js', '<script src="/agritrust-data.js')
+rep('<script src="./support.js"></script>', '<link rel="preconnect" href="https://inwsyhopzbuvqjipvuhg.supabase.co" crossorigin>\n<script src="/support.js?v=1"></script>')
+rep('<script src="./image-slot.js"></script>', '<script src="/image-slot.js?v=1"></script>')
+
+# ---- lighter on mobile data: photos load only when they scroll into view ----
+src = src.replace('<img src="{{ ', '<img loading="lazy" decoding="async" src="{{ ')
+
+# ---- honest homepage and buyers wording ----
+rep("Sell your maize, mahangu or goats to buyers you can check, get paid through escrow, and borrow against the harvest you're already growing. AgriTRUST keeps the whole deal on one record, so nobody has to take anyone's word for it.",
+    "Sell your maize, mahangu or goats to buyers you can check, agree the price in writing and keep the whole deal on one record, so nobody has to take anyone's word for it. Escrow payments and harvest loans are coming during our pilot.")
+rep('color:#5B6657">DEAL #AT-20931</span>', 'color:#5B6657">EXAMPLE DEAL</span>')
+rep("""<h2 style="margin:0 0 12px;font:700 {{ L.h2 }} -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;letter-spacing:-.015em;line-height:1.08;max-width:640px">How a sale stays safe</h2>""",
+    """<h2 style="margin:0 0 12px;font:700 {{ L.h2 }} -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;letter-spacing:-.015em;line-height:1.08;max-width:640px">How a sale will stay safe</h2>""")
+rep("The buyer's money sits in escrow until your produce arrives and matches the report. If something goes wrong, the Dispute Centre has the scan, the chat and the delivery record to look at.",
+    "Today every offer, counter-offer and signed agreement is saved for both sides, and the Dispute Centre has the chat and the agreement to look at if something goes wrong. Escrow is the next step we are adding during our pilot.")
+rep("Farmers who apply come with a FarmScore and a trade history you can read before you say yes.",
+    "Farmers who ask come with a profile and a record of their deals on AgriTRUST that you can read before you say yes.")
+rep("Informal lenders want money every month, even in January when nothing has been harvested. Harvest Finance sets one repayment date that lines up with your sale, and it comes out of escrow automatically. A better FarmScore gets you a lower rate.",
+    "Informal lenders want money every month, even in January when nothing has been harvested. We are working with partner lenders on loans with one repayment date that lines up with your sale. You can apply now and our team will call you.")
+rep(">Check what you qualify for</button>", ">Apply to be considered</button>")
+rep("<p style=\"margin:0;font-size:15.5px;line-height:1.6;color:#4F5A4B\">Verified Buyer Contracts let you agree price and volume with a group of farmers in August for a May harvest. They can borrow against it, which makes delivery more likely.</p>",
+    "<p style=\"margin:0;font-size:15.5px;line-height:1.6;color:#4F5A4B\">Coming during our pilot: Verified Buyer Contracts that let you agree price and volume with a group of farmers in August for a May harvest. Until then, post what you need on the Buyer Request Board below.</p>")
+rep("<p style=\"margin:0;font-size:15.5px;line-height:1.6;color:#4F5A4B\">Add an AgriHaul truck when you agree terms. The driver's delivery confirmation is what releases escrow.</p>",
+    "<p style=\"margin:0;font-size:15.5px;line-height:1.6;color:#4F5A4B\">Request an AgriHaul truck when you agree terms, and our team helps you find a transporter for the load.</p>")
+rep("<p style=\"margin:0;font-size:15.5px;line-height:1.6;color:#4F5A4B\">QualityScan reports show moisture, visible defects and a shelf-life range. For export lots you can ask for a lab test before paying.</p>",
+    "<p style=\"margin:0;font-size:15.5px;line-height:1.6;color:#4F5A4B\">Ask the seller for a QualityScan grade, which our team gives from a photo of a sample. For export lots you can ask for a lab test before paying.</p>")
+rep("Signing up is free and takes a phone number. An AgriTRUST agent in your region can help you set up your Farm Passport.",
+    "Signing up is free and takes a phone number. If you would rather have help, ask us and someone from the team will call you.")
+rep("<p style=\"margin:0\">Our AI tools explain why they suggest a price or a grade. If you disagree with a QualityScan result, you can ask for a human review at no cost.</p>",
+    "<p style=\"margin:0\">While our AI tools are being trained, QualityScan grades come from people on our team. If you disagree with a grade, tell us and we will look again at no cost.</p>")
+rep("<p style=\"margin:0\">You can download everything we hold about your farm, or ask us to delete it, from your account settings.</p>",
+    "<p style=\"margin:0\">Ask us through the Contact page and we will send you a copy of everything we hold about you, or delete it. Our <button onClick=\"{{ goPrivacy }}\" style=\"border:0;background:transparent;padding:0;cursor:pointer;font-size:16.5px;font-weight:600;color:#2E5E2F\">privacy policy</button> explains the details.</p>")
+
+# ---- marketplace: one-listing view and WhatsApp sharing ----
+rep('''          <input value="{{ q }}" onChange="{{ onQ }}" placeholder="Search maize, goats, Omusati…"''',
+'''          <sc-if value="{{ hasFocus }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:#EAF1DC;border-radius:8px;padding:12px 16px;font-size:15px;color:#1F4221"><span>You are looking at one listing that was shared with you.</span><button onClick="{{ seeAll }}" style="border:0;cursor:pointer;background:#2E5E2F;color:#fff;font-size:14px;font-weight:600;padding:9px 14px;border-radius:6px">See all listings</button></div></sc-if>
+          <sc-if value="{{ focusMissing }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px dashed #D6D1BF;border-radius:8px;padding:32px;text-align:center;color:#5B6657">This listing has been sold or removed by the seller.</div></sc-if>
+          <input value="{{ q }}" onChange="{{ onQ }}" placeholder="Search maize, goats, Omusati…"''')
+rep('''                  <button onClick="{{ l.open }}" style="margin-top:auto;border:0;cursor:pointer;background:{{ l.btnBg }};color:{{ l.btnColor }};font-size:15px;font-weight:600;padding:12px;border-radius:6px">{{ l.btn }}</button>''',
+'''                  <button onClick="{{ l.open }}" style="margin-top:auto;border:0;cursor:pointer;background:{{ l.btnBg }};color:{{ l.btnColor }};font-size:15px;font-weight:600;padding:12px;border-radius:6px">{{ l.btn }}</button>
+                  <sc-if value="{{ l.canShare }}" hint-placeholder-val="{{ false }}"><a href="{{ l.share }}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #CFE3C4;border-radius:6px;padding:9px;font-size:14px;font-weight:600;color:#1F7A3A;text-decoration:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5a9.4 9.4 0 0 0-8.1 14.2L2.5 21.5l4.9-1.3A9.4 9.4 0 1 0 12 2.5Zm0 17.1c-1.5 0-2.9-.4-4.2-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A7.7 7.7 0 1 1 12 19.6Zm4.3-5.7c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.3 6.3 0 0 1-3.1-2.7c-.2-.4.2-.4.7-1.3.1-.1 0-.3 0-.4l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5a.9.9 0 0 0-.6.3 2.7 2.7 0 0 0-.9 2c0 1.2.9 2.4 1 2.5.1.2 1.7 2.7 4.2 3.7 1.6.7 2.2.7 3 .6.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1l-.5-.2Z"></path></svg>Share on WhatsApp</a></sc-if>''')
+
+# ---- community: replies ----
+rep('<span style="color:#5B6657">{{ p.meta }}</span>',
+    '<button onClick="{{ p.toggleReplies }}" style="border:0;background:transparent;cursor:pointer;padding:0;font-size:14px;font-weight:600;color:#2E5E2F">{{ p.replyBtn }}</button><span style="color:#7A8475;margin-left:auto">{{ p.meta }}</span>')
+rep('''                    <button onClick="{{ p.like }}" style="border:0;background:transparent;cursor:pointer;padding:0;font-size:14px;font-weight:600;color:{{ p.likeColor }}">♥ {{ p.likes }}</button>''',
+    '''                    <button onClick="{{ p.like }}" style="border:0;background:transparent;cursor:pointer;padding:0;font-size:14px;font-weight:600;color:{{ p.likeColor }}">♥ {{ p.likes }}</button>''')
+rep('''                  </div>
+                </div>
+              </sc-for>
+            </div>''','''                  </div>
+                  <sc-if value="{{ p.open }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:10px;padding-top:4px">
+                      <sc-for list="{{ p.replies }}" as="rp" hint-placeholder-count="2">
+                        <div style="background:#F7F5EE;border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px"><span style="font-size:13px;font-weight:700;color:#1C2A1D">{{ rp.who }} <span style="font-weight:400;color:#7A8475">· {{ rp.when }}</span></span><span style="font-size:14.5px;line-height:1.5;color:#3E4A3C">{{ rp.body }}</span></div>
+                      </sc-for>
+                      <sc-if value="{{ p.noReplies }}" hint-placeholder-val="{{ false }}"><div style="font-size:14px;color:#7A8475">No replies yet. Be the first to answer.</div></sc-if>
+                      <div style="display:flex;gap:8px"><input value="{{ replyDraft }}" onChange="{{ onReplyDraft }}" onKeyDown="{{ replyKey }}" placeholder="Write a reply…" style="flex:1;min-width:0;border:1px solid #D6D1BF;border-radius:20px;padding:10px 14px;font-size:14.5px;background:#fff"><button onClick="{{ sendReply }}" style="border:0;background:#2E5E2F;color:#fff;border-radius:20px;padding:0 16px;font-size:14px;font-weight:600;cursor:pointer;flex:none">Reply</button></div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>''')
+
+# ---- listing editor ----
+rep('''      <sc-if value="{{ MD.mine }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <p style="margin:0;font-size:15px;color:#3E4A3C;line-height:1.55">{{ manageName }}</p>
+          <p style="margin:0;font-size:14px;color:#5B6657;line-height:1.55">Mark it as sold once the deal is done, or remove it if you no longer have it. Either way buyers will stop seeing it.</p>
+          <button onClick="{{ removeListing }}" style="align-self:flex-start;border:1px solid #E5B9B2;background:#fff;color:#A93226;border-radius:6px;padding:10px 14px;font-size:14.5px;font-weight:600;cursor:pointer">Remove listing</button>
+        </div>
+      </sc-if>''','''      <sc-if value="{{ MD.mine }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:14px;border-top:1px solid #F0EDE2;padding-top:14px">
+          <p style="margin:0;font-size:14px;color:#5B6657;line-height:1.55">Change the details above and save, or close the listing once it is sold. Buyers stop seeing sold or removed listings.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button onClick="{{ soldListing }}" style="border:1px solid #9BBC5F;background:#F3F7EA;color:#1F4221;border-radius:6px;padding:10px 14px;font-size:14.5px;font-weight:600;cursor:pointer">Mark as sold</button>
+            <button onClick="{{ removeListing }}" style="border:1px solid #E5B9B2;background:#fff;color:#A93226;border-radius:6px;padding:10px 14px;font-size:14.5px;font-weight:600;cursor:pointer">Remove listing</button>
+          </div>
+        </div>
+      </sc-if>''')
+# reuse the listing form fields for editing
+rep('<sc-if value="{{ MD.listing }}" hint-placeholder-val="{{ false }}">', '<sc-if value="{{ MD.listingForm }}" hint-placeholder-val="{{ false }}">')
+
+# ---- settings: language note ----
+rep('''<sc-for list="{{ langs }}" as="lg" hint-placeholder-count="5"><option value="{{ lg }}">{{ lg }}</option></sc-for></select></label>''',
+    '''<sc-for list="{{ langs }}" as="lg" hint-placeholder-count="5"><option value="{{ lg }}">{{ lg }}</option></sc-for></select><span style="font-size:12.5px;font-weight:400;color:#5B6657">{{ langNote }}</span></label>''')
+
+# ---- privacy policy and terms pages ----
+PAGE = lambda label, title, body: f'''
+  <sc-if value="{{{{ P.{label} }}}}" hint-placeholder-val="{{{{ false }}}}">
+  <div data-screen-label="Website · {title}">
+    <section style="max-width:820px;margin:0 auto;padding:{{{{ L.pageHeroPad }}}};display:flex;flex-direction:column;gap:18px;font-size:16.5px;line-height:1.7;color:#3E4A3C">
+      <div style="font:600 14px {FONT};color:#8C7431">Last updated 15 October 2026</div>
+      <h1 style="margin:0;font:700 {{{{ L.h2 }}}} {FONT};line-height:1.08;color:#1C2A1D">{title}</h1>
+      {body}
+    </section>
+  </div>
+  </sc-if>
+'''
+H = lambda t: f'<h2 style="margin:14px 0 0;font:700 21px {FONT};color:#1C2A1D">{t}</h2>'
+Pp = lambda t: f'<p style="margin:0">{t}</p>'
+privacy_body = ''.join([
+  Pp('AgriTRUST is run by Cloud Computing Investment CC in Windhoek, Namibia. This page explains what we collect when you use agritrusthub.com, why we collect it and who can see it. We wrote it in plain language because farmers should not need a lawyer to understand where their information goes.'),
+  H('What we collect'),
+  Pp('When you create an account we keep your name, phone number, region, the roles you picked and your password, which is stored in a scrambled form that even we cannot read. If you add a photo, we keep that too.'),
+  Pp('When you use the platform we keep what you post and do: listings and their photos, offers, counter-offers and signed agreements, chat messages, community posts and replies, barter and land requests, theft reports, disputes, truck requests, loan applications, QualityScan photos and the income and costs you record in Farm Accounting.'),
+  Pp('When you use a form on the website without an account, such as Contact, the Buyer Request Board or a request for an agent to call, we keep what you type into it.'),
+  H('Who can see what'),
+  Pp('Anyone can see your listings, your name, your region, your profile photo and the number of deals you have signed. Community posts, replies, barter requests and land listings are public too.'),
+  Pp('Your phone number is private. Other members do not see it unless you share it with them in a chat. Buyers who post on the Buyer Request Board choose to share their contact details with signed-in members.'),
+  Pp('Offers, agreements and chats are seen only by the two people in them. Your Farm Accounting records, disputes, loan applications, truck requests and QualityScan photos are seen only by you and by the small AgriTRUST team who handle them.'),
+  H('Why we use it'),
+  Pp('We use your information to run the platform, to connect you with the people you choose to trade with, to answer your requests, to keep people safe from fraud and theft, and to improve AgriTRUST. We do not sell your information and we do not use it for advertising.'),
+  H('Where it is kept'),
+  Pp('Our database and photos are kept with Supabase on servers in the European Union, and the website is hosted by Hostinger. Both protect the data with encryption while it travels and access controls while it is stored.'),
+  H('How long we keep it'),
+  Pp('We keep your information while your account is open. If you ask us to close your account, we delete your profile and records, except where we must keep a record of a signed agreement or a dispute for a reasonable time to deal with a complaint.'),
+  H('Your choices'),
+  Pp('You can change your name, region, photo and settings at any time in Profile and settings. You can ask for a copy of everything we hold about you, ask us to correct it, or ask us to delete it, by writing to us through the Contact page.'),
+  H('Changes and questions'),
+  Pp('If we change how we use your information, we will update this page and tell members in the platform. If you have a question, use the Contact page and a person from the team will reply.'),
+])
+terms_body = ''.join([
+  Pp('These terms apply when you use agritrusthub.com. AgriTRUST is run by Cloud Computing Investment CC in Windhoek, Namibia. By creating an account you agree to them, so please read them.'),
+  H('Where AgriTRUST is today'),
+  Pp('AgriTRUST is in its pilot stage. Accounts, listings, offers, signed agreements, chat and the other tools work, but some features are not live yet. AgriTRUST does not hold or move money today, escrow is not switched on, and Harvest Finance applications are passed to partner lenders who make their own decisions. QualityScan grades are given by our team from a photo and are an opinion, not a certificate.'),
+  H('Your account'),
+  Pp('You must give your real name and a phone number you use, and keep your password to yourself. You are responsible for what happens on your account. Tell us straight away if you think someone else has used it.'),
+  H('Trading on AgriTRUST'),
+  Pp('Deals are between the buyer and the seller. AgriTRUST is not a party to them and does not guarantee the quality, quantity, delivery or payment of anything listed. Check what you are buying, agree payment and collection clearly, and keep everything in the chat and the signed agreement so there is a record if something goes wrong.'),
+  Pp('A signed agreement on AgriTRUST records what both sides accepted. If a deal goes wrong, open a dispute and we will look at the record and try to help, but we cannot force either side to pay or deliver.'),
+  H('What you must not do'),
+  Pp('Do not list anything you do not own or have the right to sell, including stolen livestock or equipment. Do not post false or misleading listings, prices or photos. Do not use AgriTRUST to cheat, threaten or harass anyone, to collect the details of other people for other purposes, or to break any law of Namibia. We may remove content and close accounts that break these rules, and we will report suspected theft to the police.'),
+  H('What you post'),
+  Pp('You keep ownership of what you post. You allow us to show it on AgriTRUST so the platform can work, for example showing your listing photo to buyers.'),
+  H('Our responsibility'),
+  Pp('We work hard to keep AgriTRUST running and secure, but we cannot promise it will always be available or free of mistakes. As far as the law allows, we are not responsible for losses that come from deals between members or from relying on a price suggestion or a grade.'),
+  H('Changes and the law'),
+  Pp('We may update these terms as AgriTRUST grows. We will tell members in the platform when we do. These terms are governed by the laws of Namibia. If you have a question, use the Contact page and a person from the team will reply.'),
+])
+rep('''  <section style="max-width:1240px;margin:0 auto;padding:{{ L.secPad }}">
+    <div style="border-radius:8px;padding:{{ L.ctaPad }};''', PAGE('privacy', 'Privacy policy', privacy_body) + PAGE('terms', 'Terms of use', terms_body) + '''  <section style="max-width:1240px;margin:0 auto;padding:{{ L.secPad }}">
+    <div style="border-radius:8px;padding:{{ L.ctaPad }};''')
+rep('<div style="max-width:1240px;margin:0 auto;padding:18px {{ L.gutter }} 28px;border-top:1px solid #33443A;font-size:13px;color:#8F998A">© 2026 AgriTRUST. Windhoek, Namibia.</div>',
+    '<div style="max-width:1240px;margin:0 auto;padding:18px {{ L.gutter }} 28px;border-top:1px solid #33443A;font-size:13px;color:#8F998A">© 2026 AgriTRUST, run by Cloud Computing Investment CC. Windhoek, Namibia.</div>')
+
+# ---- sign up: agree to terms ----
+rep('''      <button onClick="{{ signUp }}" style="border:0;cursor:pointer;background:#2E5E2F;color:#fff;font-size:16px;font-weight:600;padding:14px;border-radius:6px">{{ lbl.signUp }}</button>''',
+    '''      <p style="margin:0;font-size:13.5px;color:#5B6657;line-height:1.5">By creating an account you agree to our <button onClick="{{ goTerms }}" style="border:0;background:transparent;padding:0;cursor:pointer;font-size:13.5px;font-weight:600;color:#2E5E2F">terms of use</button> and <button onClick="{{ goPrivacy }}" style="border:0;background:transparent;padding:0;cursor:pointer;font-size:13.5px;font-weight:600;color:#2E5E2F">privacy policy</button>.</p>
+      <button onClick="{{ signUp }}" style="border:0;cursor:pointer;background:#2E5E2F;color:#fff;font-size:16px;font-weight:600;padding:14px;border-radius:6px">{{ lbl.signUp }}</button>''')
+
+# ---- admin screen ----
+ADMIN = f'''
+      <sc-if value="{{{{ S.admin }}}}" hint-placeholder-val="{{{{ false }}}}">
+        <div data-screen-label="Platform · Team admin" style="display:flex;flex-direction:column;gap:18px;max-width:1180px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+            <div><h1 style="margin:0;font:700 {{{{ A.h1 }}}} {FONT};letter-spacing:-.015em">Team admin</h1><p style="margin:6px 0 0;font-size:15.5px;color:#5B6657">Everything members and visitors have asked for. Only people on the team list can see this page.</p></div>
+            <button onClick="{{{{ adminRefresh }}}}" style="border:1px solid #D6D1BF;cursor:pointer;background:#fff;color:#1C2A1D;font-size:14.5px;font-weight:600;padding:10px 16px;border-radius:6px">Refresh</button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{{{ adminTabs }}}}" as="t" hint-placeholder-count="6"><button onClick="{{{{ t.onClick }}}}" style="border:1px solid {{{{ t.border }}}};background:{{{{ t.bg }}}};color:{{{{ t.color }}}};font-size:14px;font-weight:600;padding:8px 14px;border-radius:6px;cursor:pointer">{{{{ t.label }}}}</button></sc-for></div>
+          <sc-if value="{{{{ adminLoading }}}}" hint-placeholder-val="{{{{ false }}}}"><div style="color:#5B6657">Loading…</div></sc-if>
+          <sc-if value="{{{{ adminEmpty }}}}" hint-placeholder-val="{{{{ false }}}}"><div style="background:#fff;border:1px dashed #D6D1BF;border-radius:8px;padding:32px;text-align:center;color:#5B6657">Nothing here yet.</div></sc-if>
+          <sc-for list="{{{{ adminItems }}}}" as="it" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #E3DFD0;border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap"><div style="font:700 17px {FONT};color:#1C2A1D">{{{{ it.title }}}}</div><sc-if value="{{{{ it.isQueue }}}}"><span style="font-size:12.5px;font-weight:700;background:{{{{ it.badgeBg }}}};padding:4px 10px;border-radius:4px">{{{{ it.badge }}}}</span></sc-if></div>
+              <sc-if value="{{{{ it.hasImg }}}}" hint-placeholder-val="{{{{ false }}}}"><a href="{{{{ it.img }}}}" target="_blank" rel="noopener"><img src="{{{{ it.img }}}}" alt="" style="width:220px;max-width:100%;height:160px;object-fit:cover;border-radius:6px;background:#EFEBDD"></a></sc-if>
+              <sc-for list="{{{{ it.lines }}}}" as="ln" hint-placeholder-count="2"><div style="font-size:14.5px;color:#3E4A3C;line-height:1.5">{{{{ ln.t }}}}</div></sc-for>
+              <sc-if value="{{{{ it.isQueue }}}}" hint-placeholder-val="{{{{ true }}}}">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding-top:8px;border-top:1px solid #F0EDE2">
+                  <label style="display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:#3E4A3C">Status<select value="{{{{ it.status }}}}" onChange="{{{{ it.onStatus }}}}" style="border:1px solid #D6D1BF;border-radius:6px;padding:9px 10px;font-size:14px;background:#fff"><sc-for list="{{{{ it.statuses }}}}" as="o"><option value="{{{{ o.v }}}}">{{{{ o.v }}}}</option></sc-for></select></label>
+                  <sc-if value="{{{{ it.hasNote }}}}" hint-placeholder-val="{{{{ true }}}}"><label style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:#3E4A3C"><span>{{{{ it.noteLabel }}}}</span><input value="{{{{ it.note }}}}" onChange="{{{{ it.onNote }}}}" style="border:1px solid #D6D1BF;border-radius:6px;padding:9px 10px;font-size:14px"></label></sc-if>
+                  <button onClick="{{{{ it.save }}}}" style="border:0;cursor:pointer;background:#2E5E2F;color:#fff;font-size:14px;font-weight:600;padding:10px 16px;border-radius:6px">Save</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{{{ it.isMember }}}}" hint-placeholder-val="{{{{ false }}}}"><button onClick="{{{{ it.reset }}}}" style="align-self:flex-start;border:1px solid #D6D1BF;cursor:pointer;background:#fff;color:#1C2A1D;font-size:14px;font-weight:600;padding:9px 14px;border-radius:6px">Give a temporary password</button></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+'''
+rep('''
+      <div style="height:{{ A.bottomSpace }}"></div>
+    </main>''', ADMIN + '''
+      <div style="height:{{ A.bottomSpace }}"></div>
+    </main>''')
+
+# ---- temporary password dialog ----
+rep('''<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">''', f'''<sc-if value="{{{{ hasTempPw }}}}" hint-placeholder-val="{{{{ false }}}}">
+  <div style="position:absolute;inset:0;z-index:55;background:rgba(28,42,29,.45);display:flex;align-items:center;justify-content:center;padding:12px">
+    <div style="width:440px;max-width:100%;background:#fff;border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:12px">
+      <div style="font:700 21px {FONT}">Temporary password</div>
+      <p style="margin:0;font-size:15px;color:#3E4A3C;line-height:1.55">Call {{{{ tempPw.name }}}} on {{{{ tempPw.phone }}}} and read this out. Ask them to change it in Profile and settings after they sign in. It will not be shown again.</p>
+      <div style="font:700 24px ui-monospace,Menlo,Consolas,monospace;background:#F3F7EA;border-radius:6px;padding:14px;text-align:center;color:#1F4221;letter-spacing:.02em">{{{{ tempPw.password }}}}</div>
+      <button onClick="{{{{ closeTempPw }}}}" style="align-self:flex-end;border:0;cursor:pointer;background:#2E5E2F;color:#fff;font-size:15px;font-weight:600;padding:11px 18px;border-radius:6px">Done</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{{{ hasToast }}}}" hint-placeholder-val="{{{{ false }}}}">''')
+
+
 # ---- centre every platform screen in the space beside the menu ----
 src = src.replace('max-width:1180px', 'max-width:1180px;width:100%;margin-left:auto;margin-right:auto')
 rep('gap:18px;max-width:820px">', 'gap:18px;max-width:820px;width:100%;margin-left:auto;margin-right:auto">')

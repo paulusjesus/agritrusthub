@@ -13,6 +13,7 @@ AgriTRUST helps farmers in Namibia sell produce and livestock to buyers they can
 | `build.py` | Combines the two files in `src/` into `site/index.html`. |
 | `supabase/migrations/` | The database tables, security rules, photo storage and live updates. |
 | `supabase/functions/agritrust-signup/` | The sign-up service that creates an account from a phone number and password. |
+| `supabase/functions/agritrust-admin/` | Team-only actions, such as giving a member a temporary password. |
 
 ## How it works
 
@@ -23,9 +24,23 @@ AgriTRUST helps farmers in Namibia sell produce and livestock to buyers they can
 
 ## What is real and what is not yet
 
-Working with real data: accounts and profiles, profile photos, Marketplace listings with photos, saving listings, offers and counter-offers, signing deal agreements, chat, notifications, Barter Exchange, LandShare, Theft Alerts, Community posts and likes, Farm Accounting, Dispute Centre, truck requests, loan applications, QualityScan photo submissions, course sign-ups, the contact form, agent call requests and the Buyer Request Board.
+Working with real data: accounts and profiles, profile photos, Marketplace listings with photos (edit, sold, remove, share on WhatsApp), saving listings, offers and counter-offers, signing deal agreements, chat, notifications, Barter Exchange, LandShare, Theft Alerts, Community posts, likes and replies, Farm Accounting, Dispute Centre, truck requests, loan applications, QualityScan photo submissions, course sign-ups, the contact form, agent call requests and the Buyer Request Board.
 
 Not live yet, and labelled as such on the site: escrow payments, the QualityScan AI model (photos are graded by hand for now), lending through Harvest Finance, the FarmScore, Academy course content and SMS or WhatsApp alerts.
+
+## Page addresses
+
+Every page has its own address, so the back button works and links can be shared: `/about`, `/privacy`, `/terms`, `/app/market`, `/app/deal`, `/listing/12` and so on. The `.htaccess` file sends every address to `index.html`, and the app opens the right page. `sitemap.xml` lists the public pages for Google.
+
+## The team admin page
+
+Team members open it at `/app/admin` after signing in. It lists call requests, contact messages, buyer requests, loan applications, truck requests, QualityScan photos to grade, disputes and theft reports, each with a status and a note. Members are told in their notifications when the team updates their request. The Members tab can give someone a temporary password over the phone.
+
+Only phone numbers on the team list can open it. To add someone, run this in the Supabase SQL editor with their number in international form:
+
+```sql
+insert into agritrust.admin_phones (phone, note) values ('264811234567', 'Name');
+```
 
 ## Making changes
 
