@@ -364,6 +364,10 @@ rep('src="assets/founder-milk-seller.png"', 'src="assets/founder-milk-seller.jpg
 # ---- labels with a binding inside a flex column need one wrapper ----
 rep('color:#3E4A3C">Price ({{ cx.code }}) *<input', 'color:#3E4A3C"><span>Price ({{ cx.code }}) *</span><input')
 
+# ---- centre every platform screen in the space beside the menu ----
+src = src.replace('max-width:1180px', 'max-width:1180px;width:100%;margin-left:auto;margin-right:auto')
+rep('gap:18px;max-width:820px">', 'gap:18px;max-width:820px;width:100%;margin-left:auto;margin-right:auto">')
+
 # ---- swap in the new logic ----
 start = src.index('<script type="text/x-dc" data-dc-script')
 start = src.index('>', start) + 1
