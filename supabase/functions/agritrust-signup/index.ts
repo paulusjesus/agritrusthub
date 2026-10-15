@@ -43,6 +43,15 @@ Deno.serve(async (req) => {
     db: { schema: "agritrust" },
   });
 
+  // At most 10 sign-up attempts an hour from one connection. Only a hash of the address is kept.
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("agritrust:" + ip));
+  const ipHash = Array.from(new Uint8Array(digest)).map((x) => x.toString(16).padStart(2, "0")).join("");
+  const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { count } = await admin.from("signup_attempts").select("id", { count: "exact", head: true }).eq("ip_hash", ipHash).gte("created_at", since);
+  if ((count ?? 0) >= 10) return json({ error: "Too many new accounts from this connection. Please try again in an hour, or ask an AgriTRUST agent to help." }, 429);
+  await admin.from("signup_attempts").insert({ ip_hash: ipHash });
+
   const { data: taken } = await admin.from("profile_private").select("id").eq("phone", phone).maybeSingle();
   if (taken) return json({ error: "This phone number already has an account. Please sign in." }, 409);
 
