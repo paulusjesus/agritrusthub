@@ -1,10 +1,10 @@
 const REGIONS = ['Erongo', 'Hardap', '//Karas', 'Kavango East', 'Kavango West', 'Khomas', 'Kunene', 'Ohangwena', 'Omaheke', 'Omusati', 'Oshana', 'Oshikoto', 'Otjozondjupa', 'Zambezi'];
 const KEYS = { mTitle: '', mCat: 'Grains', mRegion: 'Oshikoto', mPrice: '', mQty: '', mUnit: 'kg', mBody: '', mTag: 'Question', mHave: '', mWant: '', mItem: '', mReason: 'Quality did not match', mDesc: '', mName: '', mPhone: '', mPlace: '', mHa: '', mTerms: 'Harvest share, 25%', mPass: '', hFrom: 'Tsumeb, Oshikoto', hTo: 'Windhoek', hLoad: '2500', hDate: '', aType: 'out', aDesc: '', aAmt: '', cName: '', cPhone: '', cRegion: 'Oshikoto', cMsg: '', bProd: '', bQty: '', bReg: 'Any region', bCo: '', bContact: '', siPhone: '', siPass: '', suName: '', suPhone: '', suPass: '', suRegion: 'Oshikoto', oPrice: '', oQty: '' };
-const U = (id) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=800&q=70`;
+const U = (id) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=640&q=60`;
 const CAT_IMG = { Grains: U('1651667343153-6dc318e27e41'), Legumes: U('1545036584-64f4c5c75467'), Vegetables: U('1634467524884-897d0af5e104'), Livestock: U('1593750187970-84858a2aaf5e'), Fruit: U('1630960411440-10f7b59717ba'), Poultry: U('1556316918-880f9e893822'), Honey: U('1587049352851-8d4e89133924'), Feed: U('1696441567861-6761b9e503a6'), Equipment: U('1594771804886-a933bb2d609b') };
 const LAND_IMG = U('1509099381441-ea3c0cf98b94');
 const PL = { bird: 'birds', jar: 'jars', bucket: 'buckets', hour: 'hours', unit: 'units', bale: 'bales', box: 'boxes', crate: 'crates', tonne: 'tonnes' };
-const I = (id) => `assets/icons/${id}.svg`;
+const I = (id) => `/assets/icons/${id}.svg`;
 const DIST = { Windhoek: 430, 'Walvis Bay': 560, Oshakati: 250, Rundu: 280, 'Katima Mulilo': 790 };
 const AVA = ['#7FA146', '#2E5E2F', '#C7A751', '#5B6657', '#8C7431', '#5E8A3C', '#1F4221'];
 const ava = (id) => AVA[[...String(id || 'x')].reduce((a, c) => a + c.charCodeAt(0), 0) % AVA.length];
@@ -123,6 +123,7 @@ class Component extends DCLogic {
     chR: 6, chM: 'sales', chI: null, cur: null, nt: { offers: true, pay: true, theft: true, tips: false }, chn: { sms: true, wa: true, email: false }, twoFa: false, suPhoto: '', suFile: null, topQ: '', chatRead: false, notifRead: false, contactSent: false, buyerSent: false, offered: {}, seen: {}, requested: {},
     live: false, demo: false, guest: false, me: null, busy: false, booting: true,
     offers: [], scans: [], interest: {}, notifs: [], buyerReqs: [], counters: {}, scImg: '', scFile: null, mFile: null, manage: null, counts: {},
+    focus: null, isAdmin: false, adminTab: 'agents', adminData: null, adminEdit: {}, openPost: null, replies: {}, replyDraft: '',
   };
 
   setFrame(el) {
@@ -150,20 +151,64 @@ class Component extends DCLogic {
   async boot() {
     if (!window.AT) { this.setState({ booting: false }); return; }
     window.AT.onAuth((event) => { if (event === 'SIGNED_OUT' && this.state.live) this.leaveLive(); });
-    try {
-      const sess = await window.AT.session();
-      if (sess) { await this.enterLive(sess.user.id); this.go('dashboard'); }
-    } catch (e) { console.warn(e); }
+    window.addEventListener('popstate', () => { this._popping = true; this.applyPath(location.pathname); });
+    let sess = null;
+    try { sess = await window.AT.session(); if (sess) await this.enterLive(sess.user.id); } catch (e) { console.warn(e); }
+    const path = location.pathname;
+    if (sess && (path === '/' || path === '/index.html')) this.go('dashboard');
+    else this.applyPath(path, true);
     this.setState({ booting: false });
+  }
+
+  // ---------- page addresses ----------
+  SITE_PAGES = ['platform', 'buyers', 'about', 'contact', 'signin', 'signup', 'privacy', 'terms'];
+  APP_SCREENS = ['dashboard', 'market', 'deal', 'scan', 'barter', 'haul', 'land', 'finance', 'accounts', 'academy', 'disputes', 'theft', 'community', 'messages', 'settings', 'admin'];
+  TITLES = { home: 'Agriculture with trust at its roots', platform: 'The platform', buyers: 'For buyers', about: 'About', contact: 'Contact', signin: 'Sign in', signup: 'Create your free account', privacy: 'Privacy policy', terms: 'Terms of use', dashboard: 'Dashboard', market: 'Marketplace', deal: 'DealWise', scan: 'QualityScan', barter: 'Barter Exchange', haul: 'AgriHaul', land: 'LandShare', finance: 'Harvest Finance', accounts: 'Farm Accounting', academy: 'Academy', disputes: 'Dispute Centre', theft: 'Theft Alerts', community: 'Community', messages: 'Messages', settings: 'Profile and settings', admin: 'Team admin' };
+  currentPath() {
+    const s = this.state;
+    if (s.mode !== 'app') return s.page === 'home' ? '/' : '/' + s.page;
+    if (s.screen === 'market' && s.focus) return '/listing/' + s.focus;
+    if (s.demo) return '/demo/' + s.screen;
+    return s.screen === 'dashboard' ? '/app' : '/app/' + s.screen;
+  }
+  syncUrl() {
+    const s = this.state, path = this.currentPath();
+    const key = s.mode === 'app' ? s.screen : s.page;
+    let title = this.TITLES[key] || 'AgriTRUST';
+    if (s.mode === 'app' && s.screen === 'market' && s.focus) { const l = s.listings.find((x) => x.id === s.focus); if (l) title = l.name + ', ' + l.region; }
+    document.title = (key === 'home' ? 'AgriTRUST · ' : title + ' · AgriTRUST') + (key === 'home' ? title : '');
+    try {
+      if (this._popping) { this._popping = false; if (location.pathname !== path) history.replaceState(null, '', path); }
+      else if (location.pathname !== path) history.pushState(null, '', path);
+    } catch (e) {}
+  }
+  applyPath(path, first) {
+    const s = this.state, parts = String(path || '/').replace(/\/index\.html$/, '/').split('/').filter(Boolean);
+    const [a, b] = parts;
+    if (!a) return this.page('home');
+    if (this.SITE_PAGES.includes(a)) return this.page(a);
+    if (a === 'listing' && /^\d+$/.test(b || '')) {
+      const id = +b;
+      if (s.live) return this.go('market', { focus: id });
+      return this.browseLive(id);
+    }
+    if (a === 'demo') { const sc = this.APP_SCREENS.includes(b) && b !== 'admin' ? b : 'dashboard'; if (!s.demo) this.setState({ demo: true, guest: false, ...demoCopy() }); return this.go(sc); }
+    if (a === 'app') {
+      const sc = this.APP_SCREENS.includes(b) ? b : 'dashboard';
+      if (s.live) return this.go(sc);
+      if (sc === 'market') return this.browseLive();
+      this.page('signin'); return first ? this.say('Please sign in to open your AgriTRUST account.') : null;
+    }
+    return this.page('home');
   }
   async enterLive(uid) {
     this.setState({ live: true, demo: false, guest: false, me: uid, ...EMPTY, saved: {}, liked: {}, offered: {}, requested: {}, seen: {} });
     this.reload();
-    window.AT.subscribe(uid, () => { clearTimeout(this._rl); this._rl = setTimeout(() => this.reload(), 400); });
+    window.AT.subscribe(uid, () => { clearTimeout(this._rl); this._rl = setTimeout(() => this.reloadMine(), 400); });
   }
   leaveLive() {
     if (window.AT) window.AT.unsubscribe();
-    this.setState({ live: false, me: null, guest: false, demo: false, ...demoCopy(), offers: [], scans: [], interest: {}, notifs: [], buyerReqs: [], saved: {}, liked: {}, offered: {}, requested: {}, seen: {}, thread: null, panel: null, cur: null });
+    this.setState({ live: false, me: null, guest: false, demo: false, isAdmin: false, adminData: null, focus: null, ...demoCopy(), offers: [], scans: [], interest: {}, notifs: [], buyerReqs: [], saved: {}, liked: {}, offered: {}, requested: {}, seen: {}, thread: null, panel: null, cur: null });
   }
   async loadPublic() {
     const pub = await window.AT.publicData();
@@ -174,8 +219,40 @@ class Component extends DCLogic {
     try {
       const [pub, mine] = await Promise.all([window.AT.publicData(), window.AT.myData(uid)]);
       if (this.state.me !== uid) return;
-      this.setState({ ...this.mapPublic(pub, mine, uid), ...this.mapMine(mine, uid) });
+      const wantAdmin = !!mine.isAdmin && location.pathname === '/app/admin' && this.state.screen !== 'admin';
+      this.setState({ ...this.mapPublic(pub, mine, uid), ...this.mapMine(mine, uid) }, () => { if (wantAdmin) this.go('admin'); });
+      if (mine.isAdmin) this.loadAdmin();
+      if (this.state.openPost) this.loadReplies(this.state.openPost);
     } catch (e) { this.say(e.message); }
+  }
+  async reloadMine() {
+    const uid = this.state.me; if (!uid) return;
+    try {
+      const mine = await window.AT.myData(uid);
+      if (this.state.me !== uid) return;
+      this.setState(this.mapMine(mine, uid));
+      if (mine.isAdmin) this.loadAdmin();
+    } catch (e) { console.warn(e); }
+  }
+  async loadAdmin() {
+    try { const d = await window.AT.adminData(); this.setState({ adminData: d }); } catch (e) { this.say(e.message); }
+  }
+  async loadReplies(postId) {
+    try {
+      const rows = await window.AT.replies(postId);
+      this.setState((st) => ({ replies: { ...st.replies, [postId]: rows.map((r) => ({ id: r.id, who: (r.who && r.who.full_name) || 'AgriTRUST member', body: r.body, when: ago(r.created_at), mine: r.author === st.me })) } }));
+    } catch (e) { this.say(e.message); }
+  }
+  togglePost(id) {
+    const open = this.state.openPost === id ? null : id;
+    this.setState({ openPost: open, replyDraft: '' });
+    if (open && this.state.live || open && this.state.guest) this.loadReplies(open);
+  }
+  sendReply() {
+    const s = this.state, txt = s.replyDraft.trim();
+    if (!txt || !s.openPost) return;
+    if (!s.live) { this.page('signin'); return this.say('Sign in to reply.'); }
+    this.run(async () => { await window.AT.insert('post_replies', { post_id: s.openPost, body: txt }, 'Your reply did not send. Please try again.'); this.setState({ replyDraft: '' }); await this.loadReplies(s.openPost); this.reload(); }, 'Reply posted.');
   }
   mapPublic(pub, mine, uid) {
     const saved = {}, liked = {}, offered = {}, requested = {};
@@ -189,7 +266,7 @@ class Component extends DCLogic {
     return {
       saved, liked, offered, requested, counts: pub.counts,
       listings: pub.listings.map((l) => ({ id: l.id, name: l.name, region: l.region, price: Number(l.price), unit: l.unit, qty: Number(l.qty), grade: l.grade, cat: l.cat, img: l.img || CAT_IMG[l.cat] || CAT_IMG.Grains, seller: nm(l.seller), sellerId: l.owner, trades: pub.stats[l.owner] || 0, posted: ago(l.created_at), age: mins(l.created_at), mine: l.owner === uid, created: l.created_at })),
-      posts: pub.posts.map((p) => ({ id: p.id, tag: p.tag, title: p.title, author: nm(p.who), authorId: p.author, date: ago(p.created_at), body: p.body, likes: (pub.counts['like:' + p.id] || 0) - (liked[p.id] ? 1 : 0), meta: p.who && p.who.region ? p.who.region : '', mine: p.author === uid })),
+      posts: pub.posts.map((p) => ({ id: p.id, tag: p.tag, title: p.title, author: nm(p.who), authorId: p.author, date: ago(p.created_at), body: p.body, likes: (pub.counts['like:' + p.id] || 0) - (liked[p.id] ? 1 : 0), region: p.who && p.who.region ? p.who.region : '', nReplies: pub.counts['reply:' + p.id] || 0, mine: p.author === uid })),
       barters: pub.barters.map((b) => ({ id: b.id, who: nm(b.who), ownerId: b.owner, region: b.region, have: b.have, want: b.want, mine: b.owner === uid, n: pub.counts['barter:' + b.id] || 0 })),
       lands: pub.lands.map((p) => ({ id: p.id, place: p.place, ha: Number(p.ha).toLocaleString('en-US') + ' ha', features: p.features || 'Details to follow.', terms: p.terms, img: p.img || LAND_IMG, mine: p.owner === uid, ownerId: p.owner, owner: nm(p.who), n: pub.counts['land:' + p.id] || 0 })),
     };
@@ -222,7 +299,7 @@ class Component extends DCLogic {
       loans: m.loans.map((x) => ({ id: x.id, label: 'Harvest loan', amount: Number(x.amount), repay: Number(x.repay), harvest: x.harvest, status: x.status })),
       bookings: m.hauls.map((x) => ({ id: x.ref, route: x.origin + ' to ' + x.destination, load: Number(x.load_kg).toLocaleString('en-US') + ' kg', date: x.pickup, cost: x.estimate ? 'about ' + this.money(Number(x.estimate)) : '', status: x.status })),
       scans: m.scans.map((x) => ({ id: x.id, crop: x.crop, img: x.img, status: x.status, result: x.result || '', when: ago(x.created_at) })),
-      notifs: m.notifications, buyerReqs: m.buyerRequests,
+      notifs: m.notifications, buyerReqs: m.buyerRequests, isAdmin: !!m.isAdmin,
       activity: act.slice(0, 6).map((a) => ({ t: a.t, d: ago(a.at), c: a.c })),
     };
   }
@@ -240,22 +317,24 @@ class Component extends DCLogic {
 
   // ---------- navigation ----------
   top() { if (this._el) this._el.scrollTop = 0; }
-  go = (screen) => {
-    const s = this.state;
+  go = (screen, opts) => {
+    const s = this.state, focus = (opts && opts.focus) || null;
+    if (screen === 'admin' && !s.isAdmin) screen = 'dashboard';
     if (!s.live && !s.demo) {
-      if (s.guest && screen === 'market') return this.setState({ mode: 'app', screen, more: false, menu: false, panel: null }, () => this.top());
+      if (s.guest && screen === 'market') return this.setState({ mode: 'app', screen, focus, more: false, menu: false, panel: null }, () => { this.top(); this.syncUrl(); });
       if (s.guest) { this.page('signin'); return this.say('Sign in or create a free account to use the rest of AgriTRUST.'); }
       this.setState({ demo: true, ...demoCopy() });
     }
-    this.setState({ mode: 'app', screen, more: false, menu: false, panel: null, search: false }, () => this.top());
+    this.setState({ mode: 'app', screen, focus, more: false, menu: false, panel: null, search: false }, () => { this.top(); this.syncUrl(); });
   };
-  browseLive = () => {
-    if (this.state.live) return this.go('market');
+  browseLive = (focus) => {
+    const f = typeof focus === 'number' ? focus : null;
+    if (this.state.live) return this.go('market', { focus: f });
     if (!window.AT) return this.go('market');
-    this.setState({ guest: true, demo: false, ...EMPTY, mode: 'app', screen: 'market', menu: false, cat: 'All', q: '' }, () => this.top());
-    this.loadPublic().catch((e) => this.say(e.message));
+    this.setState({ guest: true, demo: false, ...EMPTY, mode: 'app', screen: 'market', focus: f, menu: false, cat: 'All', q: '' }, () => { this.top(); this.syncUrl(); });
+    this.loadPublic().then(() => this.syncUrl()).catch((e) => this.say(e.message));
   };
-  page = (page) => this.setState({ mode: 'site', page, menu: false }, () => this.top());
+  page = (page) => this.setState({ mode: 'site', page, menu: false }, () => { this.top(); this.syncUrl(); });
   CUR = { USD: ['$', 1 / 18, 'US dollar'], NAD: ['N$', 1, 'Namibian dollar'], ZAR: ['R', 1, 'South African rand'], BWP: ['P', 0.75, 'Botswana pula'], ZMW: ['K', 1.45, 'Zambian kwacha'], AOA: ['Kz ', 50, 'Angolan kwanza'], KES: ['KSh ', 7.2, 'Kenyan shilling'], NGN: ['₦', 85, 'Nigerian naira'], EUR: ['€', 0.048, 'Euro'], GBP: ['£', 0.042, 'British pound'] };
   C2C = { US: 'USD', NA: 'NAD', ZA: 'ZAR', BW: 'BWP', ZM: 'ZMW', AO: 'AOA', KE: 'KES', NG: 'NGN', GB: 'GBP', DE: 'EUR', FR: 'EUR', ES: 'EUR', IT: 'EUR', NL: 'EUR', PT: 'EUR', BE: 'EUR', AT: 'EUR', IE: 'EUR', FI: 'EUR', GR: 'EUR', LU: 'EUR' };
   TZ2C = { 'Africa/Windhoek': 'NA', 'Africa/Johannesburg': 'ZA', 'Africa/Gaborone': 'BW', 'Africa/Lusaka': 'ZM', 'Africa/Luanda': 'AO', 'Africa/Nairobi': 'KE', 'Africa/Lagos': 'NG', 'Europe/London': 'GB' };
@@ -394,9 +473,21 @@ class Component extends DCLogic {
     }
     if (s.modal === 'mine') {
       const l = s.manage; if (!l) return this.close();
-      return this.run(async () => { await AT.update('listings', { id: l.id }, { status: 'sold' }); this.setState({ modal: null, manage: null }); this.reload(); }, 'Marked as sold. The listing is no longer shown to buyers.');
+      if (!this.need('mTitle', 'mPrice', 'mQty')) return;
+      if (!(num(s.mPrice) > 0) || !(num(s.mQty) > 0)) return this.setState({ err: 'Price and quantity must be numbers above zero.' });
+      return this.run(async () => {
+        const img = s.mFile ? await AT.upload(s.me, 'listings', s.mFile) : undefined;
+        const patch = { name: s.mTitle.trim(), price: Math.round(num(s.mPrice) / this.rate() * 100) / 100, qty: num(s.mQty), region: s.mRegion, cat: s.mCat, unit: s.mUnit };
+        if (img) patch.img = img;
+        await AT.update('listings', { id: l.id }, patch, 'Your changes did not save. Please try again.');
+        this.setState({ modal: null, manage: null, mFile: null, mImg: '' }); this.reload();
+      }, 'Listing updated.');
     }
   }
+  soldListing = () => {
+    const l = this.state.manage; if (!l || !this.state.live) return this.close();
+    this.run(async () => { await window.AT.update('listings', { id: l.id }, { status: 'sold' }); this.setState({ modal: null, manage: null }); this.reload(); }, 'Marked as sold. The listing is no longer shown to buyers.');
+  };
   removeListing = () => {
     const l = this.state.manage; if (!l || !this.state.live) return this.close();
     this.run(async () => { await window.AT.update('listings', { id: l.id }, { status: 'removed' }); this.setState({ modal: null, manage: null }); this.reload(); }, 'Listing removed.');
@@ -488,8 +579,9 @@ class Component extends DCLogic {
       ['Grow', [['land', 'LandShare'], ['finance', 'Harvest Finance'], ['accounts', 'Farm Accounting'], ['academy', 'Academy']]],
       ['Protect', [['disputes', 'Dispute Centre'], ['theft', 'Theft Alerts']]],
       ['People', [['community', 'Community']]],
+      ...(s.isAdmin ? [['Team', [['admin', 'Team admin']]]] : []),
     ];
-    const mk = ([id, label]) => { const a = s.screen === id; return { label, icon: I(id), onClick: () => this.go(id), bg: a ? '#EAF1DC' : 'transparent', color: a ? '#1F4221' : '#3E4A3C', border: a ? '#9BBC5F' : '#E3DFD0', dot: a ? '#2E5E2F' : '#CFCAB8' }; };
+    const mk = ([id, label]) => { const a = s.screen === id; return { label, icon: I(id === 'admin' ? 'more' : id), onClick: () => this.go(id), bg: a ? '#EAF1DC' : 'transparent', color: a ? '#1F4221' : '#3E4A3C', border: a ? '#9BBC5F' : '#E3DFD0', dot: a ? '#2E5E2F' : '#CFCAB8' }; };
     const navGroups = groups.map(([g, items]) => ({ g, items: items.map(mk) }));
     const nav = groups.flatMap(([, items]) => items).map(mk);
     const bottomNav = [['dashboard', 'Home'], ['market', 'Market'], ['deal', 'DealWise'], ['finance', 'Finance'], ['more', 'More']].map(([id, label]) => {
@@ -505,16 +597,19 @@ class Component extends DCLogic {
         const on = !s.saved[l.id]; this.setState((st) => ({ saved: { ...st.saved, [l.id]: on } })); this.say(on ? 'Saved to AgriSave.' : 'Removed from AgriSave.');
         if (live) (on ? window.AT.insert('saved_listings', { listing_id: l.id }) : window.AT.remove('saved_listings', { listing_id: l.id, user_id: s.me })).catch((er) => this.say(er.message));
       },
+      share: 'https://wa.me/?text=' + encodeURIComponent(l.name + ', ' + l.qty.toLocaleString('en-US') + ' ' + (PL[l.unit] || l.unit) + ' in ' + l.region + ' on AgriTRUST: https://agritrusthub.com/listing/' + l.id), canShare: !isDemo || s.guest, link: () => this.go('market', { focus: l.id }),
       qtyTxt: l.qty.toLocaleString('en-US') + ' ' + (l.qty === 1 ? l.unit : PL[l.unit] || l.unit), btn: l.mine ? (live ? 'Manage listing' : 'Your listing') : 'Make an offer', btnBg: l.mine ? '#EFEBDD' : '#2E5E2F', btnColor: l.mine ? '#1F4221' : '#fff',
       open: () => {
         if (s.guest) { this.page('signin'); return this.say('Sign in or create a free account to make an offer.'); }
-        if (l.mine) return live ? this.open('mine', { manage: l }) : this.say('This is your listing. Buyer offers will show up in DealWise.');
+        if (l.mine) return live ? this.open('mine', { manage: l, mTitle: l.name, mPrice: String(Math.round(l.price * this.rate() * 100) / 100), mQty: String(l.qty), mRegion: l.region, mCat: l.cat, mUnit: l.unit, mImg: '' }) : this.say('This is your listing. Buyer offers will show up in DealWise.');
         clearTimeout(this._t);
         if (live) this.setState({ dealId: l.id, oPrice: String(Math.round(l.price * this.rate() * 100) / 100), oQty: String(l.qty) });
         else this.setState({ dealId: l.id, stage: 'open' });
         this.go('deal');
       } });
-    const listings = s.listings.filter((l) => (s.cat === 'All' || l.cat === s.cat || (s.cat === 'Saved' && s.saved[l.id])) && (!q || (l.name + ' ' + l.region + ' ' + l.cat + ' ' + (l.seller || '')).toLowerCase().includes(q))).sort((a, b) => (s.sort === 'low' ? a.price - b.price : s.sort === 'high' ? b.price - a.price : (a.age || 0) - (b.age || 0))).map(fmtL);
+    const catOk = (l) => s.cat === 'All' || l.cat === s.cat || (s.cat === 'Saved' && s.saved[l.id]);
+    const qOk = (l) => !q || (l.name + ' ' + l.region + ' ' + l.cat + ' ' + (l.seller || '')).toLowerCase().includes(q);
+    const listings = s.listings.filter((l) => (s.focus ? l.id === s.focus : catOk(l) && qOk(l))).sort((a, b) => (s.sort === 'low' ? a.price - b.price : s.sort === 'high' ? b.price - a.price : (a.age || 0) - (b.age || 0))).map(fmtL);
     const nSaved = Object.values(s.saved).filter(Boolean).length;
     const curT = s.threads.find((t) => t.id === s.thread) || s.threads[0] || { id: 0, name: 'No conversations yet', role: live ? 'Messages from buyers and sellers show here' : '', go: 'market', bg: '#CFCAB8', msgs: [] };
     const cats = ['All', 'Saved', 'Grains', 'Legumes', 'Vegetables', 'Fruit', 'Livestock', 'Poultry', 'Honey', 'Feed', 'Equipment'].map((c) => ({ label: c === 'Saved' ? '♥ Saved (' + nSaved + ')' : c, onClick: () => this.setState({ cat: c }), ...chip(s.cat === c) }));
@@ -583,7 +678,7 @@ class Component extends DCLogic {
     const hs = harvestsData[s.hIdx];
     const interest = Math.round(s.amount * 0.115 * hs[2] / 12);
 
-    const posts = s.posts.map((p) => { const l = !!s.liked[p.id]; return { ...p, likes: p.likes + (l ? 1 : 0), meta: live ? p.meta : p.comments + ' replies', likeColor: l ? '#B24A3A' : '#5B6657', like: () => {
+    const posts = s.posts.map((p) => { const l = !!s.liked[p.id]; const open = s.openPost === p.id; return { ...p, likes: p.likes + (l ? 1 : 0), meta: live ? (p.region || '') : '', replyBtn: live ? (open ? 'Hide replies' : (p.nReplies ? p.nReplies + (p.nReplies === 1 ? ' reply' : ' replies') : 'Reply')) : p.comments + ' replies', toggleReplies: () => (live ? this.togglePost(p.id) : this.say('Replies are not saved in the demo.')), open, replies: s.replies[p.id] || [], noReplies: open && !(s.replies[p.id] || []).length, likeColor: l ? '#B24A3A' : '#5B6657', like: () => {
       this.setState({ liked: { ...s.liked, [p.id]: !l } });
       if (live) (l ? window.AT.remove('post_likes', { post_id: p.id, user_id: s.me }) : window.AT.insert('post_likes', { post_id: p.id })).catch((e) => this.say(e.message));
     } }; });
@@ -614,12 +709,12 @@ class Component extends DCLogic {
     const siteFoot = [
       { g: 'Platform', items: [['Marketplace', () => this.browseLive()], ['DealWise', () => this.go('deal')], ['QualityScan', () => this.go('scan')], ['LandShare', () => this.go('land')], ['Harvest Finance', () => this.go('finance')]] },
       { g: 'Company', items: [['About us', () => this.page('about')], ['For buyers', () => this.page('buyers')], ['All tools', () => this.page('platform')], ['Contact', () => this.page('contact')]] },
-      { g: 'Help', items: [['Find an agent', () => this.open('agent')], ['Dispute Centre', () => this.go('disputes')], ['Data Charter', () => this.page('about')], live ? ['My account', () => this.go('dashboard')] : ['Sign in', () => this.page('signin')]] },
+      { g: 'Help', items: [['Find an agent', () => this.open('agent')], ['Dispute Centre', () => this.go('disputes')], ['Privacy policy', () => this.page('privacy')], ['Terms of use', () => this.page('terms')], live ? ['My account', () => this.go('dashboard')] : ['Sign in', () => this.page('signin')]] },
     ].map((c) => ({ g: c.g, items: c.items.map(([label, onClick]) => ({ label, onClick })) }));
 
     const tools = [
-      ['Trade', [['market', 'Marketplace', 'List produce or livestock with a grade and photos. Buyers nearby and abroad can find it.'], ['deal', 'DealWise', 'See what similar lots are asking and send an offer or a counter-offer.'], ['scan', 'QualityScan', 'A grade, moisture estimate and shelf-life range from one photo.'], ['barter', 'Barter Exchange', 'Swap grain for tractor time or feed for goats when cash is short.'], ['haul', 'AgriHaul', 'Request a truck, see a rough price up front and track the load.']]],
-      ['Grow', [['land', 'LandShare', 'Lease land on rent, harvest share or profit share terms.'], ['finance', 'Harvest Finance', 'Loans repaid once, from the sale of your harvest.'], ['accounts', 'Farm Accounting', 'Income and costs in one place, so you know if a crop paid.'], ['academy', 'Academy', 'Short courses in storage, pricing, livestock and export.']]],
+      ['Trade', [['market', 'Marketplace', 'List produce or livestock with a grade and photos. Buyers nearby and abroad can find it.'], ['deal', 'DealWise', 'See what similar lots are asking and send an offer or a counter-offer.'], ['scan', 'QualityScan', 'Send a photo of a sample and get a grade back from our team.'], ['barter', 'Barter Exchange', 'Swap grain for tractor time or feed for goats when cash is short.'], ['haul', 'AgriHaul', 'Request a truck, see a rough price up front and track the load.']]],
+      ['Grow', [['land', 'LandShare', 'Lease land on rent, harvest share or profit share terms.'], ['finance', 'Harvest Finance', 'Apply for a loan repaid once, from the sale of your harvest.'], ['accounts', 'Farm Accounting', 'Income and costs in one place, so you know if a crop paid.'], ['academy', 'Academy', 'Short courses in storage, pricing, livestock and export.']]],
       ['Protect', [['disputes', 'Dispute Centre', 'When a deal goes wrong, the chat and the agreement are all there.'], ['theft', 'Theft Alerts', 'Report stolen cattle or equipment to farmers in your region.'], ['community', 'Community', 'Ask other farmers, vets and agronomists.']]],
     ].map(([g, items]) => ({ g, items: items.map(([id, name, text]) => ({ name, text, icon: I(id), onClick: () => this.go(id) })) }));
 
@@ -658,21 +753,21 @@ class Component extends DCLogic {
       banner: s.demo ? { show: true, text: 'You are exploring the demo. The people, prices and deals here are examples and nothing is saved.', btn: 'Create a free account', onClick: () => this.leaveDemo('signup') }
         : s.guest ? { show: true, text: 'You are browsing as a guest. Sign in to make offers, save listings and message sellers.', btn: 'Sign in', onClick: () => this.page('signin') }
         : { show: false },
-      P: { home: s.page === 'home', platform: s.page === 'platform', buyers: s.page === 'buyers', about: s.page === 'about', contact: s.page === 'contact', signin: s.page === 'signin', signup: s.page === 'signup' },
+      P: { home: s.page === 'home', platform: s.page === 'platform', buyers: s.page === 'buyers', about: s.page === 'about', contact: s.page === 'contact', signin: s.page === 'signin', signup: s.page === 'signup', privacy: s.page === 'privacy', terms: s.page === 'terms' },
       modeTabs: seg([['site', 'Website'], ['app', 'Platform']], mode, (m) => this.setState({ mode: m, menu: false, more: false }, () => this.top())),
       deviceTabs: seg([['desktop', 'Desktop'], ['tablet', 'Tablet'], ['mobile', 'Mobile']], device, (dv) => this.setState({ device: dv, menu: false, more: false })),
       siteNav, siteFoot, tools, menuOpen: s.menu && !desk, toggleMenu: () => this.setState({ menu: !s.menu }),
-      goHome: () => this.page('home'), goSignin: () => (live ? this.go('dashboard') : this.page('signin')), goSignup: () => (live ? this.go('dashboard') : this.page('signup')), goBuyers: () => this.page('buyers'), goPlatformPage: () => this.page('platform'), goAbout: () => this.page('about'),
+      goHome: () => this.page('home'), goPrivacy: () => this.page('privacy'), goTerms: () => this.page('terms'), goSignin: () => (live ? this.go('dashboard') : this.page('signin')), goSignup: () => (live ? this.go('dashboard') : this.page('signup')), goBuyers: () => this.page('buyers'), goPlatformPage: () => this.page('platform'), goAbout: () => this.page('about'),
       signinLabel: live ? 'My account' : 'Sign in', signupLabel: live ? 'Open my dashboard' : 'Create free account',
       goDash: () => this.go('dashboard'), goMarket: () => this.go('market'), browseLive: () => this.browseLive(), goLand: () => this.go('land'), goFinance: () => this.go('finance'), goScan: () => this.go('scan'), goDeal: () => this.go('deal'), goAccounts: () => this.go('accounts'), goHaul: () => this.go('haul'), goMessages: () => this.go('messages'),
       signOut: () => this.doSignOut(),
       openAgent: () => this.open('agent'), openListing: () => (this.needLive('post a listing') && this.open('listing')), openPost: () => this.open('post'), openBarter: () => this.open('barter'), openDispute: () => this.open('dispute', { mItem: live ? '' : deal.name + ' to Namib Grain Traders' }), openTheft: () => this.open('theft'), openLandForm: () => (this.needLive('list your land') && this.open('land')),
       modalOpen: !!s.modal, err: s.err, hasErr: !!s.err, close: this.close, submit: this.submit, stop: (e) => e.stopPropagation(), busy: s.busy,
-      MD: { listing: s.modal === 'listing', post: s.modal === 'post', barter: s.modal === 'barter', dispute: s.modal === 'dispute', theft: s.modal === 'theft', agent: s.modal === 'agent', land: s.modal === 'land', password: s.modal === 'password', mine: s.modal === 'mine' },
+      MD: { listingForm: s.modal === 'listing' || s.modal === 'mine', listing: s.modal === 'listing', post: s.modal === 'post', barter: s.modal === 'barter', dispute: s.modal === 'dispute', theft: s.modal === 'theft', agent: s.modal === 'agent', land: s.modal === 'land', password: s.modal === 'password', mine: s.modal === 'mine' },
       modalTitle: { listing: 'Post a listing', post: 'Write a post', barter: 'Post a barter request', dispute: 'Open a dispute', theft: 'Report a theft', agent: 'Ask an agent to call you', land: 'List your land', password: 'Change your password', mine: 'Manage your listing' }[s.modal] || '',
-      modalBtn: s.busy ? 'Saving…' : ({ listing: 'Publish listing', post: 'Post', barter: 'Post request', dispute: 'Open dispute', theft: 'Send alert', agent: 'Request a call', land: 'List land', password: 'Change password', mine: 'Mark as sold' }[s.modal] || 'Save'),
+      modalBtn: s.busy ? 'Saving…' : ({ listing: 'Publish listing', post: 'Post', barter: 'Post request', dispute: 'Open dispute', theft: 'Send alert', agent: 'Request a call', land: 'List land', password: 'Change password', mine: 'Save changes' }[s.modal] || 'Save'),
       lbl: { signIn: s.busy ? 'Signing in…' : 'Sign in', signUp: s.busy ? 'Creating your account…' : 'Create account', sendOffer: s.busy ? 'Sending…' : 'Send offer', sendScan: s.busy ? 'Sending…' : 'Send for grading', apply: s.busy ? 'Sending…' : 'Apply for ' + this.money(s.amount), save: s.busy ? 'Saving…' : 'Save changes' },
-      manageName: s.manage ? s.manage.name + ' · ' + s.manage.qtyTxt + ' at ' + s.manage.priceTxt + ' per ' + s.manage.unit : '', removeListing: this.removeListing,
+      manageName: s.manage ? s.manage.name : '', removeListing: this.removeListing, soldListing: this.soldListing, isMineModal: s.modal === 'mine', notMineModal: s.modal !== 'mine',
       toast: s.toast, hasToast: !!s.toast,
       user: s.user, firstName, greet, dashSub, initials: initialsOf(s.user),
       contactSent: s.contactSent, contactOpen: !s.contactSent,
@@ -696,7 +791,7 @@ class Component extends DCLogic {
           this.say('Welcome back, ' + this.state.user.split(' ')[0] + '.');
         });
       },
-      forgot: () => { this.open('agent', { mPhone: s.siPhone }); this.say('Leave your name and phone number and we will call you to reset your password.'); },
+      forgot: () => { this.open('agent', { mPhone: s.siPhone }); this.say('Leave your name and number. Our team will call you and give you a temporary password.'); },
       demoSignIn: () => { this.setState({ demo: true, guest: false, ...demoCopy() }); this.go('dashboard'); this.say('You are in the demo. Explore freely. Nothing here is real or saved.'); },
       signUp: () => {
         if (!s.suName.trim() || !s.suPhone.trim()) return this.say('Please add your name and phone number.');
@@ -715,19 +810,19 @@ class Component extends DCLogic {
       modules: [
         { icon: I('market'), name: 'Marketplace', text: 'List produce or livestock with photos and a grade. Buyers from your region and from export markets can find it.', onClick: () => this.browseLive() },
         { icon: I('deal'), name: 'DealWise', text: 'When an offer comes in, you see what similar lots are asking and can send a counter-offer. Every step is saved.', onClick: () => this.go('deal') },
-        { icon: I('scan'), name: 'QualityScan', text: 'Photograph a sample and get a grade, a moisture estimate and a shelf-life range. The report travels with your listing.', onClick: () => this.go('scan') },
-        { icon: I('finance'), name: 'Harvest Finance', text: 'Loans for seed, feed or equipment that you repay once, from the sale. Your FarmScore sets the rate.', onClick: () => this.go('finance') },
+        { icon: I('scan'), name: 'QualityScan', text: 'Photograph a sample and get a grade back. While the QualityScan model is being trained, our team grades each photo by hand.', onClick: () => this.go('scan') },
+        { icon: I('finance'), name: 'Harvest Finance', text: 'Apply for a loan for seed, feed or equipment that you repay once, from the sale. Partner lenders are joining during our pilot.', onClick: () => this.go('finance') },
         { icon: I('land'), name: 'LandShare', text: 'Farm land you don’t own, or earn from land you aren’t using. Rent, harvest share or profit share, written down.', onClick: () => this.go('land') },
         { icon: I('barter'), name: 'Barter Exchange', text: 'Short on cash before harvest? Swap grain for tractor hours, or lucerne for weaners, with the trade recorded.', onClick: () => this.go('barter') },
       ],
       steps: [
-        { n: '01', c: '#9BBC5F', t: 'List it with a scan', d: 'Your QualityScan report sits on the listing, so the buyer knows the grade before they call.' },
-        { n: '02', c: '#5E8A3C', t: 'Agree terms in DealWise', d: 'Price, quantity, collection date. Everything you agree is saved as a digital deal agreement.' },
-        { n: '03', c: '#2E5E2F', t: 'Buyer pays into escrow', d: 'The money is held by AgriTRUST. You can see it has arrived before anything leaves your farm.' },
-        { n: '04', c: '#C7A751', t: 'Released on delivery', d: 'The buyer confirms the load matches. Funds go to your account or mobile wallet the same day.' },
+        { n: '01', c: '#9BBC5F', t: 'List it with a photo', d: 'Post your produce with a clear photo. You can send a sample photo to QualityScan and our team will grade it.' },
+        { n: '02', c: '#5E8A3C', t: 'Agree terms in DealWise', d: 'Offer, counter and accept the price and quantity. Both sides sign, and the agreement is saved for both of you.' },
+        { n: '03', c: '#2E5E2F', t: 'Escrow, coming in the pilot', d: 'We are adding escrow with a licensed payment partner, so the buyer pays in first and you see the money before anything leaves your farm.' },
+        { n: '04', c: '#C7A751', t: 'Release on delivery, coming next', d: 'Once escrow is live, the buyer confirms the load matches and the money is released to you. Until then, agree payment directly.' },
       ],
       values: [
-        ['Trust', 'Verified identities, escrow and a record of every deal.'], ['Fairness', 'Fair prices, fair access to land and fair finance.'],
+        ['Trust', 'Profiles you can check and a written record of every deal, with escrow on the way.'], ['Fairness', 'Fair prices, fair access to land and fair finance.'],
         ['Ethical AI', 'AI suggests, people decide. Experts review the hard cases.'], ['Data privacy', 'Farm records are shared only when you say so.'],
         ['Quality', 'Grades and shelf-life estimates buyers can rely on.'], ['Protection', 'Help against scams, fake inputs, theft and climate shocks.'],
         ['Sustainability', 'Farming that looks after soil, water and biodiversity.'], ['Food security', 'Less waste after harvest, more food reaching people.'],
@@ -764,7 +859,7 @@ class Component extends DCLogic {
       },
       onUser: (e) => this.setState({ user: e.target.value }), prPhone: s.prPhone, onPrPhone: (e) => (live ? this.say('Your phone number is how you sign in. Ask an agent if it needs to change.') : this.setState({ prPhone: e.target.value })),
       prRegion: s.prRegion, onPrRegion: (e) => this.setState({ prRegion: e.target.value }), prLang: s.prLang, onPrLang: (e) => this.setState({ prLang: e.target.value }),
-      langs: ['English', 'Oshiwambo', 'Afrikaans', 'Otjiherero', 'Rukwangali', 'German'],
+      langs: ['English', 'Oshiwambo', 'Afrikaans', 'Otjiherero', 'Rukwangali', 'German'], langNote: s.prLang === 'English' ? 'AgriTRUST is in English for now.' : 'AgriTRUST is in English for now. We save your choice so we know which languages to add first.',
       ntToggles: [['offers', 'Offers and messages', 'When a buyer makes an offer or sends a chat'], ['pay', 'Payments and escrow', 'When funds are held or released'], ['theft', 'Theft alerts near me', 'Stolen livestock or equipment in your region'], ['tips', 'Farming tips', 'New Academy lessons and market prices']].map(([id, label, d]) => ({ label, d, track: s.nt[id] ? '#2E5E2F' : '#D6D1BF', jc: s.nt[id] ? 'flex-end' : 'flex-start', onClick: () => this.setState({ nt: { ...s.nt, [id]: !s.nt[id] } }) })),
       chToggles: [['sms', 'SMS', 'Works on any phone, no data needed'], ['wa', 'WhatsApp', 'Messages to ' + s.prPhone], ['email', 'Email', 'Weekly summary of your sales']].map(([id, label, d]) => ({ label, d, track: s.chn[id] ? '#2E5E2F' : '#D6D1BF', jc: s.chn[id] ? 'flex-end' : 'flex-start', onClick: () => this.setState({ chn: { ...s.chn, [id]: !s.chn[id] } }) })),
       changePin: () => (live ? this.open('password') : this.say('We sent a reset code to ' + s.prPhone + '.')), twoFaLabel: s.twoFa ? 'Turn off 2-step sign-in' : 'Turn on 2-step sign-in',
@@ -815,7 +910,10 @@ class Component extends DCLogic {
         ? (notifRows.length ? notifRows : [{ id: 0, title: 'Welcome', body: 'Offers, messages and alerts will show up here.', created_at: new Date().toISOString(), read: true, go: 'dashboard', kind: 'info' }]).map((n) => ({ ini: initialsOf(n.title), t: n.title + ': ' + n.body, d: ago(n.created_at), bg: { offer: '#2E5E2F', message: '#7FA146', theft: '#C0392B', barter: '#5E8A3C', land: '#8C7431' }[n.kind] || '#5B6657', fw: n.read ? 400 : 700, dc: n.read ? '#6B7466' : '#2E5E2F', dot: n.read ? 'none' : 'block', onClick: () => { this.setState({ panel: null }); this.go(n.go || 'dashboard'); } }))
         : [['Buyer offer', 'A buyer in Windhoek offered NAD 17.80/kg for your groundnuts.', '5m', '#2E5E2F', 'market'], ['QualityScan', 'Your maize lot was graded Grade A.', '40m', '#7FA146', 'scan'], ['Theft alert', 'Cattle reported missing near Tsumeb. Check your kraal.', '2h', '#C0392B', 'theft'], ['Harvest Finance', 'Your loan application moved to review.', '5h', '#C7A751', 'finance'], ['Academy', 'New lesson: storing grain after harvest.', 'Yesterday', '#5B6657', 'academy']].map(([n, t, d, bg, go], i) => ({ ini: initialsOf(n), t: n + ': ' + t, d, bg, fw: i < 4 && !s.notifAll ? 700 : 400, dc: i < 4 && !s.notifAll ? '#2E5E2F' : '#6B7466', dot: i < 4 && !s.notifAll ? 'block' : 'none', onClick: () => { this.setState({ panel: null }); this.go(go); } })),
       moreOpen: s.more && mob,
-      S: { ...Object.fromEntries(['messages', 'settings', 'dashboard', 'market', 'deal', 'scan', 'barter', 'haul', 'land', 'finance', 'accounts', 'academy', 'disputes', 'theft', 'community'].map((k) => [k, s.screen === k])), dealDemo: s.screen === 'deal' && !live, dealLive: s.screen === 'deal' && live, scanDemo: s.screen === 'scan' && !live, scanLive: s.screen === 'scan' && live },
+      hasFocus: !!s.focus, focusMissing: !!s.focus && !listings.length, seeAll: () => this.go('market'),
+      openReplies: s.openPost, replyDraft: s.replyDraft, onReplyDraft: (e) => this.setState({ replyDraft: e.target.value }), replyKey: (e) => { if (e.key === 'Enter') this.sendReply(); }, sendReply: () => this.sendReply(),
+      ...this.adminVals(s),
+      S: { ...Object.fromEntries(['messages', 'settings', 'dashboard', 'market', 'deal', 'scan', 'barter', 'haul', 'land', 'finance', 'accounts', 'academy', 'disputes', 'theft', 'community', 'admin'].map((k) => [k, s.screen === k])), dealDemo: s.screen === 'deal' && !live, dealLive: s.screen === 'deal' && live, scanDemo: s.screen === 'scan' && !live, scanLive: s.screen === 'scan' && live },
       kpis: live ? [
         { label: 'Income recorded', value: this.money(inc), note: 'From Farm Accounting', c: '#1C2A1D', onClick: () => this.go('accounts') },
         { label: 'Active listings', value: String(myCount), note: 'Tap to post another', c: '#1C2A1D', onClick: () => this.open('listing') },
@@ -908,6 +1006,56 @@ class Component extends DCLogic {
         if (a.mine) return this.say('Anyone who reports a sighting will show up in your notifications.');
         if (live) { if (sn) return this.say('Thanks, you already reported this.'); return this.run(async () => { await window.AT.insert('theft_sightings', { alert_id: a.id }); this.setState({ seen: { ...s.seen, [a.id]: true } }); }, 'Thanks. The owner has been told. If you can, call the police too.'); }
         this.setState({ seen: { ...s.seen, [a.id]: !sn } }); if (!sn) this.say('Thanks. The owner and the nearest agent have been told.'); } }; }), noAlerts: live && !s.alerts.length,
+    };
+  }
+  adminVals(s) {
+    const d = s.adminData;
+    if (!s.isAdmin) return { adminTabs: [], adminItems: [], adminEmpty: false, adminLoading: false };
+    const members = {}; ((d && d.members) || []).forEach((m) => (members[m.id] = m));
+    const who = (id) => { const m = members[id]; return m ? m.full_name + ' · ' + window.AT.prettyPhone(m.phone) + ' · ' + m.region : 'Member'; };
+    const T = {
+      agents: { label: 'Call requests', table: 'agent_requests', rows: d ? d.agents : [], open: (r) => r.status === 'New', statuses: ['New', 'Called', 'Done'], note: 'team_note',
+        view: (r) => ({ title: r.name, lines: [window.AT.prettyPhone(window.AT.phoneDigits(r.phone)) || r.phone, (r.region || '') + ' · asked ' + ago(r.created_at)] }) },
+      contacts: { label: 'Messages', table: 'contact_messages', rows: d ? d.contacts : [], open: (r) => r.status === 'New', statuses: ['New', 'Replied', 'Done'], note: 'team_note',
+        view: (r) => ({ title: r.name, lines: [r.message, [r.phone, r.region, ago(r.created_at)].filter(Boolean).join(' · ')] }) },
+      buyers: { label: 'Buyer requests', table: 'buyer_requests', rows: d ? d.buyers : [], open: (r) => r.status === 'Open', statuses: ['Open', 'Closed'],
+        view: (r) => ({ title: r.product + ', ' + r.qty, lines: [[r.company, r.region].filter(Boolean).join(' · '), 'Contact: ' + r.contact + ' · ' + ago(r.created_at)] }) },
+      loans: { label: 'Loans', table: 'loan_applications', rows: d ? d.loans : [], open: (r) => ['Received', 'Calling'].includes(r.status), statuses: ['Received', 'Calling', 'Approved', 'Declined'], note: 'team_note',
+        view: (r) => ({ title: this.money(Number(r.amount)) + ' from ' + r.harvest, lines: [who(r.owner), 'Repay ' + this.money(Number(r.repay)) + ' · applied ' + ago(r.created_at)] }) },
+      hauls: { label: 'Trucks', table: 'haul_requests', rows: d ? d.hauls : [], open: (r) => r.status === 'Requested', statuses: ['Requested', 'Transporter found', 'Done', 'Cancelled'], note: 'team_note',
+        view: (r) => ({ title: r.ref + ' · ' + r.origin + ' to ' + r.destination, lines: [who(r.owner), Number(r.load_kg).toLocaleString('en-US') + ' kg · ' + r.pickup + (r.estimate ? ' · estimate ' + this.money(Number(r.estimate)) : '')] }) },
+      scans: { label: 'QualityScan', table: 'scan_requests', rows: d ? d.scans : [], open: (r) => r.status === 'Waiting for review', statuses: ['Waiting for review', 'Graded', 'Photo unclear'], note: 'result', noteLabel: 'Grade and notes, for example: Grade A, clean, about 12% moisture',
+        view: (r) => ({ title: r.crop, img: r.img, lines: [who(r.owner), 'Sent ' + ago(r.created_at)] }) },
+      disputes: { label: 'Disputes', table: 'disputes', rows: d ? d.disputes : [], open: (r) => r.status === 'Under review', statuses: ['Under review', 'Resolved', 'Closed'], note: 'note',
+        view: (r) => ({ title: r.ref + ' · ' + r.deal, lines: [r.reason + '. ' + r.description, who(r.owner) + ' · ' + ago(r.created_at)] }) },
+      thefts: { label: 'Theft reports', table: 'theft_alerts', rows: d ? d.thefts : [], open: (r) => r.status === 'Open', statuses: ['Open', 'Police notified', 'Recovered', 'Closed'],
+        view: (r) => ({ title: r.what, lines: [r.place + (r.details ? ' · ' + r.details : ''), who(r.owner) + ' · ' + ago(r.created_at)] }) },
+      members: { label: 'Members', rows: d ? d.members : [], open: () => false,
+        view: (r) => ({ title: r.full_name || 'No name', lines: [window.AT.prettyPhone(r.phone) + ' · ' + r.region, r.roles + ' · joined ' + ago(r.created_at)] }) },
+    };
+    const tab = T[s.adminTab] ? s.adminTab : 'agents', t = T[tab];
+    const adminTabs = Object.keys(T).map((k) => { const n = (T[k].rows || []).filter(T[k].open).length; return { label: T[k].label + (n ? ' (' + n + ')' : ''), onClick: () => this.setState({ adminTab: k }), bg: k === tab ? '#2E5E2F' : '#fff', color: k === tab ? '#fff' : '#1C2A1D', border: k === tab ? '#2E5E2F' : '#D6D1BF' }; });
+    const rows = [...(t.rows || [])].sort((a, b) => (t.open(b) ? 1 : 0) - (t.open(a) ? 1 : 0));
+    const adminItems = rows.map((r) => {
+      const key = tab + ':' + r.id, ed = s.adminEdit[key] || {}, v = t.view(r);
+      const status = ed.status ?? r.status, note = ed.note ?? (t.note ? r[t.note] || '' : '');
+      const setEd = (patch) => this.setState((st) => ({ adminEdit: { ...st.adminEdit, [key]: { ...(st.adminEdit[key] || {}), ...patch } } }));
+      return {
+        title: v.title, lines: v.lines.filter(Boolean).map((x) => ({ t: x })), hasImg: !!v.img, img: v.img || '', isOpen: t.open(r), badge: t.open(r) ? 'Needs action' : (r.status || ''), badgeBg: t.open(r) ? '#F6EBC9' : '#EAF1DC',
+        isQueue: tab !== 'members', isMember: tab === 'members',
+        statuses: (t.statuses || []).map((x) => ({ v: x })), status, onStatus: (e) => setEd({ status: e.target.value }),
+        hasNote: !!t.note, note, noteLabel: t.noteLabel || 'Team note (the member sees notes on loans, trucks and disputes)', onNote: (e) => setEd({ note: e.target.value }),
+        save: () => {
+          const patch = { status };
+          if (t.note) patch[t.note] = note.trim() || (t.note === 'note' ? r.note : null);
+          this.run(async () => { await window.AT.update(t.table, { id: r.id }, patch, 'That did not save. Please try again.'); this.setState((st) => { const e2 = { ...st.adminEdit }; delete e2[key]; return { adminEdit: e2 }; }); await this.loadAdmin(); }, 'Saved.');
+        },
+        reset: () => this.run(async () => { const res = await window.AT.adminReset(r.id); this.setState({ tempPw: { name: res.name, phone: window.AT.prettyPhone(r.phone), password: res.password } }); }),
+      };
+    });
+    return {
+      adminTabs, adminItems, adminEmpty: !!d && !adminItems.length, adminLoading: !d, adminRefresh: () => this.loadAdmin(),
+      tempPw: s.tempPw || {}, hasTempPw: !!s.tempPw, closeTempPw: () => this.setState({ tempPw: null }),
     };
   }
   chart(cur, prv, labels, n, s, period, link) {
