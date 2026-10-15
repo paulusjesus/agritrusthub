@@ -237,6 +237,17 @@ class Component extends DCLogic {
   async loadAdmin() {
     try { const d = await window.AT.adminData(); this.setState({ adminData: d }); } catch (e) { this.say(e.message); }
   }
+  downloadBackup(r) {
+    this.run(async () => {
+      const data = await window.AT.backupGet(r.id);
+      const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'agritrust-backup-' + String(r.taken_at).slice(0, 10) + '.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }, 'Downloaded. Keep it somewhere safe, such as Google Drive.');
+  }
   async loadReplies(postId) {
     try {
       const rows = await window.AT.replies(postId);
@@ -861,7 +872,7 @@ class Component extends DCLogic {
       onUser: (e) => this.setState({ user: e.target.value }), prPhone: s.prPhone, onPrPhone: (e) => (live ? this.say('Your phone number is how you sign in. Ask an agent if it needs to change.') : this.setState({ prPhone: e.target.value })),
       prRegion: s.prRegion, onPrRegion: (e) => this.setState({ prRegion: e.target.value }), prLang: s.prLang, onPrLang: (e) => this.setState({ prLang: e.target.value }),
       langs: ['English', 'Oshiwambo', 'Afrikaans', 'Otjiherero', 'Rukwangali', 'German'], langNote: s.prLang === 'English' ? 'AgriTRUST is in English for now.' : 'AgriTRUST is in English for now. We save your choice so we know which languages to add first.',
-      ntToggles: [['offers', 'Offers and messages', 'When a buyer makes an offer or sends a chat'], ['pay', 'Payments and escrow', 'When funds are held or released'], ['theft', 'Theft alerts near me', 'Stolen livestock or equipment in your region'], ['tips', 'Farming tips', 'New Academy lessons and market prices']].map(([id, label, d]) => ({ label, d, track: s.nt[id] ? '#2E5E2F' : '#D6D1BF', jc: s.nt[id] ? 'flex-end' : 'flex-start', onClick: () => this.setState({ nt: { ...s.nt, [id]: !s.nt[id] } }) })),
+      ntToggles: [['offers', 'Offers and messages', 'When a buyer makes an offer or sends a chat'], ['pay', 'Deals and payments', 'When a deal is signed or a payment is recorded'], ['theft', 'Theft alerts near me', 'Stolen livestock or equipment in your region'], ['tips', 'Farming tips', 'New Academy lessons and market prices']].map(([id, label, d]) => ({ label, d, track: s.nt[id] ? '#2E5E2F' : '#D6D1BF', jc: s.nt[id] ? 'flex-end' : 'flex-start', onClick: () => this.setState({ nt: { ...s.nt, [id]: !s.nt[id] } }) })),
       chToggles: [['sms', 'SMS', 'Works on any phone, no data needed'], ['wa', 'WhatsApp', 'Messages to ' + s.prPhone], ['email', 'Email', 'Weekly summary of your sales']].map(([id, label, d]) => ({ label, d, track: s.chn[id] ? '#2E5E2F' : '#D6D1BF', jc: s.chn[id] ? 'flex-end' : 'flex-start', onClick: () => this.setState({ chn: { ...s.chn, [id]: !s.chn[id] } }) })),
       changePin: () => (live ? this.open('password') : this.say('We sent a reset code to ' + s.prPhone + '.')), twoFaLabel: s.twoFa ? 'Turn off 2-step sign-in' : 'Turn on 2-step sign-in',
       toggle2fa: () => { this.setState({ twoFa: !s.twoFa }); this.say(s.twoFa ? '2-step sign-in turned off.' : '2-step sign-in is on.'); },
@@ -906,6 +917,7 @@ class Component extends DCLogic {
       isTyping: !live && s.typing === curT.id, draft: s.draft, onDraft: (e) => this.setState({ draft: e.target.value }),
       draftKey: (e) => { if (e.key === 'Enter') this.sendMsg(); }, sendMsg: () => this.sendMsg(), backToList: () => this.setState({ thread: null }),
       openThreadTool: () => this.go(curT.go),
+      noThreads: s.threads.length === 0,
       msgListD: mob && s.thread ? 'none' : 'flex', msgThreadD: mob && !s.thread ? 'none' : 'flex',
       notifs: live
         ? (notifRows.length ? notifRows : [{ id: 0, title: 'Welcome', body: 'Offers, messages and alerts will show up here.', created_at: new Date().toISOString(), read: true, go: 'dashboard', kind: 'info' }]).map((n) => ({ ini: initialsOf(n.title), t: n.title + ': ' + n.body, d: ago(n.created_at), bg: { offer: '#2E5E2F', message: '#7FA146', theft: '#C0392B', barter: '#5E8A3C', land: '#8C7431' }[n.kind] || '#5B6657', fw: n.read ? 400 : 700, dc: n.read ? '#6B7466' : '#2E5E2F', dot: n.read ? 'none' : 'block', onClick: () => { this.setState({ panel: null }); this.go(n.go || 'dashboard'); } }))
@@ -1031,6 +1043,9 @@ class Component extends DCLogic {
         view: (r) => ({ title: r.ref + ' · ' + r.deal, lines: [r.reason + '. ' + r.description, who(r.owner) + ' · ' + ago(r.created_at)] }) },
       thefts: { label: 'Theft reports', table: 'theft_alerts', rows: d ? d.thefts : [], open: (r) => r.status === 'Open', statuses: ['Open', 'Police notified', 'Recovered', 'Closed'],
         view: (r) => ({ title: r.what, lines: [r.place + (r.details ? ' · ' + r.details : ''), who(r.owner) + ' · ' + ago(r.created_at)] }) },
+      backups: { label: 'Backups', rows: d ? d.backups || [] : [], open: () => false,
+        view: (r) => { const c = r.counts || {}; return { title: 'Copy of ' + new Date(r.taken_at).toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          lines: [[['profiles', 'member'], ['listings', 'listing'], ['offers', 'offer'], ['messages', 'message'], ['posts', 'post']].map(([k, w]) => (c[k] || 0) + ' ' + w + ((c[k] || 0) === 1 ? '' : 's')).join(' · '), Math.max(1, Math.round(r.bytes / 1024)) + ' KB'] }; } },
       members: { label: 'Members', rows: d ? d.members : [], open: () => false,
         view: (r) => ({ title: r.full_name || 'No name', lines: [window.AT.prettyPhone(r.phone) + ' · ' + r.region, r.roles + ' · joined ' + ago(r.created_at)] }) },
     };
@@ -1043,7 +1058,8 @@ class Component extends DCLogic {
       const setEd = (patch) => this.setState((st) => ({ adminEdit: { ...st.adminEdit, [key]: { ...(st.adminEdit[key] || {}), ...patch } } }));
       return {
         title: v.title, lines: v.lines.filter(Boolean).map((x) => ({ t: x })), hasImg: !!v.img, img: v.img || '', isOpen: t.open(r), badge: t.open(r) ? 'Needs action' : (r.status || ''), badgeBg: t.open(r) ? '#F6EBC9' : '#EAF1DC',
-        isQueue: tab !== 'members', isMember: tab === 'members',
+        isQueue: tab !== 'members' && tab !== 'backups', isMember: tab === 'members', isBackup: tab === 'backups',
+        download: () => this.downloadBackup(r),
         statuses: (t.statuses || []).map((x) => ({ v: x })), status, onStatus: (e) => setEd({ status: e.target.value }),
         hasNote: !!t.note, note, noteLabel: t.noteLabel || 'Team note (the member sees notes on loans, trucks and disputes)', onNote: (e) => setEd({ note: e.target.value }),
         save: () => {
@@ -1056,6 +1072,7 @@ class Component extends DCLogic {
     });
     return {
       adminTabs, adminItems, adminEmpty: !!d && !adminItems.length, adminLoading: !d, adminRefresh: () => this.loadAdmin(),
+      adminIsBackups: tab === 'backups', backupNow: () => this.run(async () => { await window.AT.backupNow(); await this.loadAdmin(); }, 'A new copy has been saved.'),
       tempPw: s.tempPw || {}, hasTempPw: !!s.tempPw, closeTempPw: () => this.setState({ tempPw: null }),
     };
   }
